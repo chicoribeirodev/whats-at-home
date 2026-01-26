@@ -1,5 +1,7 @@
+import { useCameraPermissions } from 'expo-camera';
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 
 import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
@@ -8,6 +10,20 @@ import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 
 export default function HomeScreen() {
+  const [permission, requestPermission] = useCameraPermissions();
+  const router = useRouter();
+
+  const handleCameraPress = async () => {
+    if (!permission?.granted) {
+      const result = await requestPermission();
+      if (!result?.granted) {
+        alert('Camera permission is required to use the camera');
+        return;
+      }
+    }
+    router.push('/camera');
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -18,11 +34,15 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+        <ThemedText type="title">What's at Home!</ThemedText>
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
+        <Pressable style={styles.cameraButton} onPress={handleCameraPress}>
+          <ThemedText style={styles.cameraButtonText}>📷 Open Camera</ThemedText>
+        </Pressable>
+      </ThemedView>
+      <ThemedView style={styles.stepContainer}>
         <ThemedText>
           Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
           Press{' '}
@@ -87,6 +107,19 @@ const styles = StyleSheet.create({
   stepContainer: {
     gap: 8,
     marginBottom: 8,
+  },
+  cameraButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cameraButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   reactLogo: {
     height: 178,
