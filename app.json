@@ -38,6 +38,15 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "react-native-scanbot-barcode-scanner-sdk",
+        {
+          "iOSCameraUsageDescription": "Barcode Camera permissions",
+          "androidCameraPermission": true,
+          "androidCameraFeature": true,
+          "mavenURLs": true
+        }
       ]
     ],
     "experiments": {
