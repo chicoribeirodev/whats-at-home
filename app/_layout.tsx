@@ -5,9 +5,14 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useEffect } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import ScanbotBarcodeSDK from 'react-native-scanbot-barcode-scanner-sdk';
+
+/* const DEFAULT_BARCODES = [
+  "5600499545911",
+  "3596710547623",
+  "7394376616709"
+]; */
 
 const LICENSE_KEY =
   "M830lD+UCTLzJSE/y4GFLkubb8N0VI" +
@@ -29,7 +34,10 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
+export const AppContext = createContext({ barcodes: [], setBarcodes: (barcodes: string[]) => { } });
+
 export default function RootLayout() {
+  const [barcodes, setBarcodes] = useState([]);
   const colorScheme = useColorScheme();
 
   useEffect(() => {
@@ -47,10 +55,12 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
+      <AppContext.Provider value={{ barcodes, setBarcodes }}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="barcode-scanner" options={{ title: 'Scan Barcode' }} />
+        </Stack>
+      </AppContext.Provider>
       <StatusBar style="auto" />
     </ThemeProvider>
   );

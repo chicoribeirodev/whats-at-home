@@ -3,34 +3,25 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import OpenAI from "openai";
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
-import ScanbotBarcodeSDK, {
-  BarcodeScannerScreenConfiguration,
-} from 'react-native-scanbot-barcode-scanner-sdk';
+import { AppContext } from '../_layout';
 
 const aiClient = new OpenAI({
   apiKey: process.env.EXPO_PUBLIC_OPEN_AI_API_KEY
 });
 
-const startBarcodeScanner = async () => {
-  const config = new BarcodeScannerScreenConfiguration();
-  const result = await ScanbotBarcodeSDK.startBarcodeScanner(config);
-  console.log('Barcode Scanner Result:', result);
-}
-
 export default function HomeScreen() {
-  const [barcodes, setBarcodes] = useState([
-    "5600499545911",
-    "3596710547623",
-    "7394376616709"
-  ]);
   const [products, setProducts] = useState<any[]>([]);
   const [recipes, setRecipes] = useState<any[]>([]);
 
+  const { barcodes } = useContext(AppContext)
+
   const getProductInfo = async (barcode: string) => {
     try {
+      console.log('Fetching product info for barcode:', barcode);
       const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
       if (!res.ok) {
         console.warn('Product fetch failed', res.status);
@@ -58,6 +49,7 @@ export default function HomeScreen() {
   };
 
   const getRecipes = async () => {
+    console.log('Generating recipes for products:', products);
     const response = await aiClient.responses.create({
       model: "gpt-4.1-mini",
       input: `Generate a list of 3 simple recipes using the following ingredients: ${products.map(p => `${p.name} ${p.quantity} ${p.unit}`).join(", ")
@@ -103,6 +95,7 @@ export default function HomeScreen() {
   }
 
   useEffect(() => {
+    console.log('Barcodes changed:', barcodes);
     const fetchBarcodes = async () => {
       const products = await Promise.all(barcodes.map(getProductInfo));
       setProducts(products.filter(Boolean));
@@ -125,7 +118,9 @@ export default function HomeScreen() {
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <Pressable style={styles.cameraButton} onPress={startBarcodeScanner}>
+        <Pressable style={styles.cameraButton} onPress={() => router.push('/barcode-scanner', {
+          onScan: (scannedBarcodes: string[]) => setBarcodes(scannedBarcodes)
+        })}>
           <ThemedText style={styles.cameraButtonText}>📷 Scan your products</ThemedText>
         </Pressable>
         <ThemedText>
