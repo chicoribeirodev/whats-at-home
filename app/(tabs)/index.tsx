@@ -7,6 +7,12 @@ import { useContext, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { AppContext } from '../_layout';
 
+const DEFAULT_BARCODES = [
+  "5600499545911",
+  "3596710547623",
+  "7394376616709"
+];
+
 const aiClient = new OpenAI({
   apiKey: process.env.EXPO_PUBLIC_OPEN_AI_API_KEY
 });
@@ -16,7 +22,7 @@ export default function HomeScreen() {
   const [recipes, setRecipes] = useState<any[]>([]);
   const [loadingRecipes, setLoadingRecipes] = useState(false);
 
-  const { barcodes } = useContext(AppContext)
+  const { barcodes, setBarcodes, setOpenRecipe } = useContext(AppContext)
 
   const getProductInfo = async (barcode: string) => {
     try {
@@ -121,6 +127,11 @@ export default function HomeScreen() {
     fetchBarcodes();
   }, [barcodes?.length]);
 
+  useEffect(() => {
+    // For testing purposes, you can uncomment the following lines to pre-populate with default barcodes
+    setBarcodes(DEFAULT_BARCODES);
+  }, []);
+
   return (
     <ScrollView
       style={{ flex: 1 }}
@@ -168,13 +179,15 @@ export default function HomeScreen() {
             {recipe.ingredients.map((ingredient: string, idx: number) => (
               <ThemedText key={idx}>- {ingredient}</ThemedText>
             ))}
-            <ThemedText type="subtitle" style={{ marginTop: 8 }}>Instructions:</ThemedText>
-            {recipe.instructions.map((instruction: string, idx: number) => (
-              <ThemedText key={idx}>{idx + 1}. {instruction}</ThemedText>
-            ))}
             <ThemedText type="subtitle" style={{ marginTop: 8 }}>Difficulty: {recipe.difficulty}</ThemedText>
             <ThemedText type="subtitle" style={{ marginTop: 8 }}>Time to make: {recipe.time_to_make_minutes} minutes</ThemedText>
             <ThemedText type="subtitle" style={{ marginTop: 8 }}>Best time of day: {recipe.time_of_day}</ThemedText>
+            <Pressable style={styles.recipeButton} onPress={() => {
+              setOpenRecipe(recipe);
+              router.push('/instructions');
+            }}>
+              <ThemedText style={styles.recipeButtonText}>View Instructions</ThemedText>
+            </Pressable>
           </ThemedView>
         ))}
       </ThemedView>
@@ -205,11 +218,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  recipeButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
   },
+  recipeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  }
 });
