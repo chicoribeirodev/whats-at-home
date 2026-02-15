@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import OpenAI from "openai";
 import { useContext, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AppContext } from '../_layout';
 
 const DEFAULT_BARCODES = [
@@ -147,27 +147,35 @@ export default function HomeScreen() {
         <ThemedText type="title">What's at Home</ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="default">Welcome to What's at Home! To get started, please scan your products.</ThemedText>
+        <ThemedText type="default">Welcome to What's at Home! To get started, please add your products.</ThemedText>
         <Pressable style={styles.cameraButton} onPress={() => router.push('/barcode-scanner')}>
-          <ThemedText style={styles.cameraButtonText}>📷 Scan your products</ThemedText>
+          <ThemedText style={styles.cameraButtonText}>📷 Scan product barcodes</ThemedText>
+        </Pressable>
+        <Pressable style={styles.cameraButton} onPress={() => { }}>
+          <ThemedText style={styles.cameraButtonText}>🖼️ Detect products from image</ThemedText>
+        </Pressable>
+        <Pressable style={styles.cameraButton} onPress={() => { }}>
+          <ThemedText style={styles.cameraButtonText}>➕ Add manually</ThemedText>
         </Pressable>
         {barcodes.length > 0 && <ThemedText>
           Detected barcodes: {barcodes.map(barcode => barcode).join(', ')}
         </ThemedText>}
-        {products.map((product, index) => (
-          <ThemedView key={index} style={{ marginTop: 12 }}>
-            <ThemedText type="subtitle">{product.name}</ThemedText>
-            {product.imageUrl ? (
-              <Image
-                source={{ uri: product.imageUrl }}
-                style={{ width: 100, height: 100, marginTop: 4 }}
-              />
-            ) : null}
-            <ThemedText>
-              Quantity: {product.quantity} {product.unit}
-            </ThemedText>
-          </ThemedView>
-        ))}
+        <View style={styles.productsGrid}>
+          {products.map((product, index) => (
+            <ThemedView key={index} style={styles.productCard}>
+              <ThemedText type="subtitle">{product.name}</ThemedText>
+              {product.imageUrl ? (
+                <Image
+                  source={{ uri: product.imageUrl }}
+                  style={styles.productImage}
+                />
+              ) : null}
+              <ThemedText>
+                Quantity: {product.quantity} {product.unit}
+              </ThemedText>
+            </ThemedView>
+          ))}
+        </View>
         {products.length > 0 && <Pressable style={styles.cameraButton} onPress={getRecipes}>
           <ThemedText style={styles.cameraButtonText}>Get recipes</ThemedText>
         </Pressable>}
@@ -184,7 +192,7 @@ export default function HomeScreen() {
             <ThemedText type="subtitle" style={{ marginTop: 8 }}>Best time of day: {recipe.time_of_day}</ThemedText>
             <Pressable style={styles.recipeButton} onPress={() => {
               setOpenRecipe(recipe);
-              router.push('/instructions');
+              router.push('/recipe');
             }}>
               <ThemedText style={styles.recipeButtonText}>View Instructions</ThemedText>
             </Pressable>
@@ -204,6 +212,22 @@ const styles = StyleSheet.create({
   stepContainer: {
     gap: 8,
     marginBottom: 8,
+  },
+  productsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  productCard: {
+    width: '48%',
+    marginTop: 12,
+  },
+  productImage: {
+    width: '100%',
+    height: 100,
+    marginTop: 4,
+    borderRadius: 6,
   },
   cameraButton: {
     backgroundColor: '#007AFF',
