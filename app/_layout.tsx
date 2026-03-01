@@ -10,10 +10,33 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-export const AppContext = createContext({
+type Recipe = {
+  title: string;
+  ingredients: string[];
+  instructions: string[];
+  difficulty: string;
+  time_to_make_minutes: number;
+  time_of_day: string;
+  calories: number;
+  calories_unit: string;
+  if_you_also_have?: string[];
+}
+
+interface AppContextType {
+  barcodes: string[];
+  setBarcodes: (barcodes: string[]) => void;
+  savedRecipes: Recipe[];
+  setSavedRecipes: (recipes: Recipe[]) => void;
+  openRecipe: Recipe | null;
+  setOpenRecipe: (recipe: Recipe | null) => void;
+}
+
+export const AppContext = createContext<AppContextType>({
   barcodes: [],
   openRecipe: null,
+  savedRecipes: [],
   setBarcodes: (barcodes: string[]) => { },
+  setSavedRecipes: (recipes: Recipe[]) => { },
   setOpenRecipe: (recipe: any) => { }
 });
 

@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { improvedPrompt, outputSchema } from '@/constants/prompts';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import OpenAI from "openai";
@@ -63,51 +64,9 @@ export default function HomeScreen() {
 
     const response = await aiClient.responses.create({
       model: "gpt-4.1-mini",
-      input: `Generate a list of 3 practical recipes using the following ingredients: ${products.map(p => `${p.name} ${p.quantity} ${p.unit}`).join(", ")}.
-        These recipes should only include the provided ingredients and should be able to make at home.
-        You can assume basic pantry staples like salt, pepper, oil, olive oil, onion and garlic are available for cooking, but they don't need to be included in the recipes mandatorily, only if they make sense to be included.
-        These recipes should be useful and make sense given the provided ingredients. 
-        They don't need to include all the ingredients, but try to use as many as possible.
-        Consider at least one simple recipe.
-        Try to keep the recipes as simple and easy to make as possible, but it's ok to provide one harder recipe if it makes good use of the ingredients.
-        `,
-      text: {
-        format: {
-          name: "recipes",
-          type: "json_schema",
-          schema: {
-            type: "object",
-            additionalProperties: false,
-            properties: {
-              recipes: {
-                type: "array",
-                items: {
-                  type: "object",
-                  additionalProperties: false,
-                  properties: {
-                    title: { type: "string" },
-                    ingredients: {
-                      type: "array",
-                      items: { type: "string" }
-                    },
-                    instructions: {
-                      type: "array",
-                      items: { type: "string" }
-                    },
-                    difficulty: { type: "string" },
-                    time_to_make_minutes: { type: "number" },
-                    time_of_day: { type: "string" },
-                  },
-                  required: ["title", "ingredients", "instructions", "difficulty", "time_to_make_minutes", "time_of_day"]
-                },
-              }
-            },
-            required: ["recipes"]
-          }
-        }
-      }
+      input: improvedPrompt(products),
+      text: outputSchema as any,
     });
-
 
     const data = response.output_text ? JSON.parse(response.output_text) : {};
 
