@@ -1,3 +1,9 @@
+export const EXAMPLE_BARCODES = [
+  "5600499545911",
+  "3596710547623",
+  "7394376616709"
+];
+
 export const EXAMPLE_RECIPES = [
   {
     "title": "Simple Chocolate Waffle Milkshake",

@@ -1,45 +1,208 @@
-import { StyleSheet } from 'react-native';
-
-import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import { generateRecipesOutputSchema, generateRecipesPrompt } from '@/constants/prompts';
+import { aiClient, MODEL } from '@/lib/open-ai-client';
+import { Image } from 'expo-image';
+import { router } from 'expo-router';
+import { useContext, useEffect, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { AppContext } from '../_layout';
 
-export default function TabTwoScreen() {
+export default function Recipes() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [recipes, setRecipes] = useState<any[]>([]);
+  const [loadingRecipes, setLoadingRecipes] = useState(false);
+
+  const { barcodes, setBarcodes, setOpenRecipe } = useContext(AppContext)
+
+  const getProductInfo = async (barcode: string) => {
+    try {
+      console.log('Fetching product info for barcode:', barcode);
+      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      if (!res.ok) {
+        console.warn('Product fetch failed', res.status);
+        return null;
+      }
+      const contentType = res.headers.get('content-type') ?? '';
+      if (!contentType.includes('application/json')) {
+        console.warn('Unexpected content-type', contentType);
+        return null;
+      }
+      const data = await res.json();
+      if (data.status === 1) {
+        return {
+          name: data.product.product_name,
+          imageUrl: data.product.image_front_small_url,
+          quantity: data.product.product_quantity,
+          unit: data.product.product_quantity_unit,
+          barcode
+        };
+      }
+      return null;
+    } catch (err) {
+      console.error('Error fetching product info:', err);
+      return {
+        name: `Unknown product for barcode ${barcode}`,
+        barcode
+      };
+    }
+  };
+
+  const getRecipes = async () => {
+    console.log('Generating recipes for products:', products);
+    setLoadingRecipes(true);
+
+    const response = await aiClient.responses.create({
+      model: MODEL,
+      input: generateRecipesPrompt(products),
+      text: generateRecipesOutputSchema as any,
+    });
+
+    const data = response.output_text ? JSON.parse(response.output_text) : {};
+
+    setRecipes(data?.recipes || []);
+    setLoadingRecipes(false);
+  }
+
+  useEffect(() => {
+    console.log('Barcodes changed:', barcodes);
+    const fetchBarcodes = async () => {
+      const newBarcodes: string[] = barcodes.filter(barcode => !products.some((p) => p && p.barcode === barcode));
+      const newProducts = await Promise.all(newBarcodes.map(getProductInfo));
+      console.log('Fetched products for new barcodes:', newBarcodes, newProducts.map(p => p?.name));
+      setProducts(prev => [...prev, ...newProducts.filter(Boolean)]);
+    };
+
+    fetchBarcodes();
+  }, [barcodes?.length]);
+
+  useEffect(() => {
+    // For testing purposes, you can uncomment the following lines to pre-populate with default barcodes
+    //setBarcodes(EXAMPLE_BARCODES);
+  }, []);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{
+        paddingTop: 50,
+        paddingHorizontal: 16,
+        minHeight: '100%',
+        gap: 16,
+        backgroundColor: "white",
+      }}
+    >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Recipes
-        </ThemedText>
+        <ThemedText type="title">Recipes</ThemedText>
       </ThemedView>
-    </ParallaxScrollView>
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText type="defaultSemiBold">Generate your recipes based on the products you have.</ThemedText>
+        <Pressable style={styles.cameraButton} onPress={() => router.push('/barcode-scanner')}>
+          <ThemedText style={styles.cameraButtonText}>📷 Scan product barcodes</ThemedText>
+        </Pressable>
+        <Pressable style={styles.cameraButton} onPress={() => { }}>
+          <ThemedText style={styles.cameraButtonText}>🖼️ Detect products from image</ThemedText>
+        </Pressable>
+        <Pressable style={styles.cameraButton} onPress={() => { }}>
+          <ThemedText style={styles.cameraButtonText}>➕ Manual Add</ThemedText>
+        </Pressable>
+        {barcodes.length > 0 && <ThemedText>
+          Detected barcodes: {barcodes.map(barcode => barcode).join(', ')}
+        </ThemedText>}
+        <View style={styles.productsGrid}>
+          {products.map((product, index) => (
+            <ThemedView key={index} style={styles.productCard}>
+              <ThemedText type="subtitle">{product.name}</ThemedText>
+              {product.imageUrl ? (
+                <Image
+                  source={{ uri: product.imageUrl }}
+                  style={styles.productImage}
+                />
+              ) : null}
+              <ThemedText>
+                Quantity: {product.quantity} {product.unit}
+              </ThemedText>
+            </ThemedView>
+          ))}
+        </View>
+        {products.length > 0 && <Pressable style={styles.cameraButton} onPress={getRecipes}>
+          <ThemedText style={styles.cameraButtonText}>Get recipes</ThemedText>
+        </Pressable>}
+        {loadingRecipes && <ThemedText>Loading recipes...</ThemedText>}
+        {recipes.map((recipe, index) => (
+          <ThemedView key={index} style={{ marginTop: 16 }}>
+            <ThemedText type="title">{recipe.title}</ThemedText>
+            <ThemedText type="subtitle" style={{ marginTop: 8 }}>Ingredients:</ThemedText>
+            {recipe.ingredients.map((ingredient: string, idx: number) => (
+              <ThemedText key={idx}>- {ingredient}</ThemedText>
+            ))}
+            <ThemedText type="subtitle" style={{ marginTop: 8 }}>Difficulty: {recipe.difficulty}</ThemedText>
+            <ThemedText type="subtitle" style={{ marginTop: 8 }}>Time to make: {recipe.time_to_make_minutes} minutes</ThemedText>
+            <ThemedText type="subtitle" style={{ marginTop: 8 }}>Best time of day: {recipe.time_of_day}</ThemedText>
+            <Pressable style={styles.recipeButton} onPress={() => {
+              setOpenRecipe(recipe);
+              router.push('/recipe');
+            }}>
+              <ThemedText style={styles.recipeButtonText}>View Instructions</ThemedText>
+            </Pressable>
+          </ThemedView>
+        ))}
+      </ThemedView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
   titleContainer: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    marginBottom: 10,
   },
+  stepContainer: {
+    gap: 8,
+    marginBottom: 8,
+  },
+  productsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  productCard: {
+    width: '48%',
+    marginTop: 12,
+  },
+  productImage: {
+    width: '100%',
+    height: 100,
+    marginTop: 4,
+    borderRadius: 6,
+  },
+  cameraButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cameraButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  recipeButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+  recipeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  }
 });

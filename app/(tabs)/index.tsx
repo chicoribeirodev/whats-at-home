@@ -1,96 +1,8 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { improvedPrompt, outputSchema } from '@/constants/prompts';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import OpenAI from "openai";
-import { useContext, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { AppContext } from '../_layout';
-
-const DEFAULT_BARCODES = [
-  "5600499545911",
-  "3596710547623",
-  "7394376616709"
-];
-
-const aiClient = new OpenAI({
-  apiKey: process.env.EXPO_PUBLIC_OPEN_AI_API_KEY
-});
+import { ScrollView, StyleSheet } from 'react-native';
 
 export default function HomeScreen() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [recipes, setRecipes] = useState<any[]>([]);
-  const [loadingRecipes, setLoadingRecipes] = useState(false);
-
-  const { barcodes, setBarcodes, setOpenRecipe } = useContext(AppContext)
-
-  const getProductInfo = async (barcode: string) => {
-    try {
-      console.log('Fetching product info for barcode:', barcode);
-      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-      if (!res.ok) {
-        console.warn('Product fetch failed', res.status);
-        return null;
-      }
-      const contentType = res.headers.get('content-type') ?? '';
-      if (!contentType.includes('application/json')) {
-        console.warn('Unexpected content-type', contentType);
-        return null;
-      }
-      const data = await res.json();
-      if (data.status === 1) {
-        return {
-          name: data.product.product_name,
-          imageUrl: data.product.image_front_small_url,
-          quantity: data.product.product_quantity,
-          unit: data.product.product_quantity_unit,
-          barcode
-        };
-      }
-      return null;
-    } catch (err) {
-      console.error('Error fetching product info:', err);
-      return {
-        name: `Unknown product for barcode ${barcode}`,
-        barcode
-      };
-    }
-  };
-
-  const getRecipes = async () => {
-    console.log('Generating recipes for products:', products);
-    setLoadingRecipes(true);
-
-    const response = await aiClient.responses.create({
-      model: "gpt-4.1-mini",
-      input: improvedPrompt(products),
-      text: outputSchema as any,
-    });
-
-    const data = response.output_text ? JSON.parse(response.output_text) : {};
-
-    setRecipes(data?.recipes || []);
-    setLoadingRecipes(false);
-  }
-
-  useEffect(() => {
-    console.log('Barcodes changed:', barcodes);
-    const fetchBarcodes = async () => {
-      const newBarcodes: string[] = barcodes.filter(barcode => !products.some((p) => p && p.barcode === barcode));
-      const newProducts = await Promise.all(newBarcodes.map(getProductInfo));
-      console.log('Fetched products for new barcodes:', newBarcodes, newProducts.map(p => p?.name));
-      setProducts(prev => [...prev, ...newProducts.filter(Boolean)]);
-    };
-
-    fetchBarcodes();
-  }, [barcodes?.length]);
-
-  useEffect(() => {
-    // For testing purposes, you can uncomment the following lines to pre-populate with default barcodes
-    setBarcodes(DEFAULT_BARCODES);
-  }, []);
-
   return (
     <ScrollView
       style={{ flex: 1 }}
@@ -106,57 +18,15 @@ export default function HomeScreen() {
         <ThemedText type="title">What's at Home</ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="default">Welcome to What's at Home! To get started, please add your products.</ThemedText>
-        <Pressable style={styles.cameraButton} onPress={() => router.push('/barcode-scanner')}>
-          <ThemedText style={styles.cameraButtonText}>📷 Scan product barcodes</ThemedText>
-        </Pressable>
-        <Pressable style={styles.cameraButton} onPress={() => { }}>
-          <ThemedText style={styles.cameraButtonText}>🖼️ Detect products from image</ThemedText>
-        </Pressable>
-        <Pressable style={styles.cameraButton} onPress={() => { }}>
-          <ThemedText style={styles.cameraButtonText}>➕ Add manually</ThemedText>
-        </Pressable>
-        {barcodes.length > 0 && <ThemedText>
-          Detected barcodes: {barcodes.map(barcode => barcode).join(', ')}
-        </ThemedText>}
-        <View style={styles.productsGrid}>
-          {products.map((product, index) => (
-            <ThemedView key={index} style={styles.productCard}>
-              <ThemedText type="subtitle">{product.name}</ThemedText>
-              {product.imageUrl ? (
-                <Image
-                  source={{ uri: product.imageUrl }}
-                  style={styles.productImage}
-                />
-              ) : null}
-              <ThemedText>
-                Quantity: {product.quantity} {product.unit}
-              </ThemedText>
-            </ThemedView>
-          ))}
-        </View>
-        {products.length > 0 && <Pressable style={styles.cameraButton} onPress={getRecipes}>
-          <ThemedText style={styles.cameraButtonText}>Get recipes</ThemedText>
-        </Pressable>}
-        {loadingRecipes && <ThemedText>Loading recipes...</ThemedText>}
-        {recipes.map((recipe, index) => (
-          <ThemedView key={index} style={{ marginTop: 16 }}>
-            <ThemedText type="title">{recipe.title}</ThemedText>
-            <ThemedText type="subtitle" style={{ marginTop: 8 }}>Ingredients:</ThemedText>
-            {recipe.ingredients.map((ingredient: string, idx: number) => (
-              <ThemedText key={idx}>- {ingredient}</ThemedText>
-            ))}
-            <ThemedText type="subtitle" style={{ marginTop: 8 }}>Difficulty: {recipe.difficulty}</ThemedText>
-            <ThemedText type="subtitle" style={{ marginTop: 8 }}>Time to make: {recipe.time_to_make_minutes} minutes</ThemedText>
-            <ThemedText type="subtitle" style={{ marginTop: 8 }}>Best time of day: {recipe.time_of_day}</ThemedText>
-            <Pressable style={styles.recipeButton} onPress={() => {
-              setOpenRecipe(recipe);
-              router.push('/recipe');
-            }}>
-              <ThemedText style={styles.recipeButtonText}>View Instructions</ThemedText>
-            </Pressable>
-          </ThemedView>
-        ))}
+        <ThemedText type="default">Welcome to What's at Home! We're here to make your life easier by helping you discover delicious recipes based on the ingredients you already have at home.</ThemedText>
+        <ThemedText type="subtitle">Your meal planner</ThemedText>
+        <ThemedText type="default">TO DO</ThemedText>
+        <ThemedText type="subtitle">Your recipes</ThemedText>
+        <ThemedText type="default">TO DO</ThemedText>
+        <ThemedText type="subtitle">Your shopping list</ThemedText>
+        <ThemedText type="default">TO DO</ThemedText>
+        <ThemedText type="subtitle">Your stats</ThemedText>
+        <ThemedText type="default">TO DO</ThemedText>
       </ThemedView>
     </ScrollView>
   );
@@ -172,47 +42,4 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 8,
   },
-  productsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  productCard: {
-    width: '48%',
-    marginTop: 12,
-  },
-  productImage: {
-    width: '100%',
-    height: 100,
-    marginTop: 4,
-    borderRadius: 6,
-  },
-  cameraButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cameraButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  recipeButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-  },
-  recipeButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  }
 });

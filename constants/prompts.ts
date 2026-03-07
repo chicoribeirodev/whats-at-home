@@ -1,4 +1,4 @@
-export const originalPrompt = (products: any[]) => `Generate a list of 3 practical recipes using the following ingredients: ${products.map(p => `${p.name} ${p.quantity} ${p.unit}`).join(", ")}.
+export const originalGenerateRecipesPrompt = (products: any[]) => `Generate a list of 3 practical recipes using the following ingredients: ${products.map(p => `${p.name} ${p.quantity} ${p.unit}`).join(", ")}.
         These recipes should only include the provided ingredients and should be able to make at home.
         You can assume basic pantry staples like salt, pepper, oil, olive oil, onion and garlic are available for cooking, but they don't need to be included in the recipes mandatorily, only if they make sense to be included.
         These recipes should be useful and make sense given the provided ingredients. 
@@ -8,7 +8,7 @@ export const originalPrompt = (products: any[]) => `Generate a list of 3 practic
         The third recipe should include the if_you_also_have field with a list of 3 additional ingredients that would make the recipe better but are not strictly necessary, and that the user is likely to have at home - add 'bonus recipe' in the title to identify this one.
         `
 
-export const improvedPrompt = (products: any[]) => `Role: You are a practical home-cooking assistant.
+export const generateRecipesPrompt = (products: any[]) => `Role: You are a practical home-cooking assistant.
 
 Input ingredients:
 ${products.map(p => `${p.name} ${p.quantity} ${p.unit}`).join(", ")}
@@ -41,7 +41,48 @@ Output rules:
 - No commentary, no explanations, no extra text
 - Output ONLY valid JSON`
 
-export const outputSchema = {
+export const generateMealsPrompt = (inputValues: any) => `Create a meal plan for the next ${inputValues.lunches} lunches and ${inputValues.dinners} dinners.
+
+Dietary goals:
+${inputValues.dietaryGoals}
+
+Allergies or restrictions:
+${inputValues.allergies}
+
+Requirements:
+- Meals should be practical and easy to cook at home.
+- Cooking time should ideally be under 40 minutes.
+- Prefer simple techniques suitable for beginner to intermediate cooks.
+- Avoid repeating the same main protein or dish style too frequently.
+- Use ingredients that are easy to find in Portugal (e.g., typical supermarkets like Continente, Pingo Doce, Lidl).
+- Favor Mediterranean-style meals and ingredients common in Portuguese kitchens when possible.
+- Assume the user already has basic pantry staples: salt, pepper, olive oil, cooking oil, onion, and garlic.
+- Meals should be balanced and include a good mix of protein, vegetables, and carbohydrates when possible.
+- Minimize food waste by reusing ingredients across meals when appropriate.
+- Avoid overly exotic or hard-to-find ingredients.
+- Meals should be suitable for normal weekday cooking (not elaborate or restaurant-style).
+- Meals should be varied and not repetitive in terms of main ingredients or cooking methods.
+
+For each meal include:
+- title
+- description
+- type_of_meal (lunch or dinner)
+- list of ingredients with quantity and unit
+- step-by-step cooking instructions
+
+Additional guidelines:
+- Prioritize balanced meals with protein, vegetables, and complex carbohydrates when possible.
+- Minimize food waste by reusing ingredients across multiple meals when appropriate.
+- Avoid overly exotic or hard-to-find ingredients.
+- Meals should be suitable for normal weekday cooking (not elaborate or restaurant-style).
+
+Output rules:
+- Output must strictly match the provided JSON schema
+- No commentary, no explanations, no extra text
+- Output ONLY valid JSON
+`
+
+export const generateRecipesOutputSchema = {
   format: {
     name: "recipes",
     type: "json_schema",
@@ -79,6 +120,50 @@ export const outputSchema = {
         }
       },
       required: ["recipes"]
+    }
+  }
+}
+
+export const generateMealsOutputSchema = {
+  format: {
+    name: "meals",
+    type: "json_schema",
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        meals: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              title: { type: "string" },
+              description: { type: "string" },
+              type_of_meal: { type: "string", enum: ["lunch", "dinner"] },
+              ingredients: {
+                type: "array",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    name: { type: "string" },
+                    quantity: { type: "number" },
+                    unit: { type: "string" }
+                  },
+                  required: ["name", "quantity", "unit"]
+                }
+              },
+              steps: {
+                type: "array",
+                items: { type: "string" }
+              }
+            },
+            required: ["title", "description", "type_of_meal", "ingredients", "steps"]
+          },
+        }
+      },
+      required: ["meals"]
     }
   }
 }
