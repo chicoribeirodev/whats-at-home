@@ -1,12 +1,14 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { generateMealsOutputSchema, generateMealsPrompt } from '@/constants/prompts';
+import { generateMealsOutputSchema, generateMealsPrompt, generateShoppingListOutputSchema, generateShoppingListPrompt } from '@/constants/prompts';
 import { aiClient, MODEL } from '@/lib/open-ai-client';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { AppContext } from '../_layout';
 
 export default function Planner() {
   const [inputValues, setInputValues] = useState({
+    people: 0,
     lunches: 0,
     dinners: 0,
     dietaryGoals: '',
@@ -14,6 +16,8 @@ export default function Planner() {
   });
   const [meals, setMeals] = useState<any[]>([]);
   const [loadingMeals, setLoadingMeals] = useState(false);
+
+  const { setShoppingList } = useContext(AppContext)
 
   const getMeals = async () => {
     console.log('Generating meals:');
@@ -31,6 +35,22 @@ export default function Planner() {
     setLoadingMeals(false);
   };
 
+  const addToCalendar = () => { console.log('Adding meals to calendar...') };
+
+  const addToShoppingList = async () => {
+    console.log('Adding meals to shopping list...')
+
+    const response = await aiClient.responses.create({
+      model: MODEL,
+      input: generateShoppingListPrompt(meals),
+      text: generateShoppingListOutputSchema as any,
+    });
+
+    console.dir(response, { depth: null });
+    const data = response.output_text ? JSON.parse(response.output_text) : {};
+    setShoppingList(data?.shopping_list || []);
+  };
+
   return (
     <ScrollView
       style={{ flex: 1 }}
@@ -43,11 +63,15 @@ export default function Planner() {
       }}
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Planner</ThemedText>
+        <ThemedText type="title">Meal Planner</ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="defaultSemiBold">Plan your meals for the next days.</ThemedText>
-        <ThemedText type="default">How many meals would you like to plan?</ThemedText>
+        <ThemedText type="defaultSemiBold">Plan your next meals.</ThemedText>
+        <ThemedText type="default">Number of people:</ThemedText>
+        <TextInput placeholder="e.g. 2" keyboardType="numeric" style={styles.inputElement} onChange={e => setInputValues({
+          ...inputValues,
+          people: parseInt(e.nativeEvent.text) || 0
+        })} />
         <ThemedText type="default">Number of lunches:</ThemedText>
         <TextInput placeholder="e.g. 3" keyboardType="numeric" style={styles.inputElement} onChange={e => setInputValues({
           ...inputValues,
@@ -58,12 +82,12 @@ export default function Planner() {
           ...inputValues,
           dinners: parseInt(e.nativeEvent.text) || 0
         })} />
-        <ThemedText type="default">Tell us your dietary goals for these meals:</ThemedText>
+        <ThemedText type="default">Dietary goals for these meals:</ThemedText>
         <TextInput placeholder="e.g. low carb, high protein, vegetarian, etc." style={styles.inputElement} onChange={e => setInputValues({
           ...inputValues,
           dietaryGoals: e.nativeEvent.text
         })} />
-        <ThemedText type="default">Any allergies or restrictions?</ThemedText>
+        <ThemedText type="default">Allergies or restrictions:</ThemedText>
         <TextInput placeholder="e.g. nuts, dairy, gluten, etc." style={styles.inputElement} onChange={e => setInputValues({
           ...inputValues,
           allergies: e.nativeEvent.text
@@ -88,6 +112,16 @@ export default function Planner() {
               ))}
             </ThemedView>
           ))
+        )}
+        {meals.length > 0 && (
+          <>
+            <Pressable style={styles.cameraButton} onPress={addToCalendar}>
+              <ThemedText style={styles.cameraButtonText}>🗓 Add to Calendar</ThemedText>
+            </Pressable>
+            <Pressable style={styles.cameraButton} onPress={addToShoppingList}>
+              <ThemedText style={styles.cameraButtonText}>🛒 Add to Shopping List</ThemedText>
+            </Pressable>
+          </>
         )}
       </ThemedView>
     </ScrollView>

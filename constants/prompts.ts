@@ -41,7 +41,7 @@ Output rules:
 - No commentary, no explanations, no extra text
 - Output ONLY valid JSON`
 
-export const generateMealsPrompt = (inputValues: any) => `Create a meal plan for the next ${inputValues.lunches} lunches and ${inputValues.dinners} dinners.
+export const generateMealsPrompt = (inputValues: any) => `Create a meal plan for the next ${inputValues.lunches} lunches and ${inputValues.dinners} dinners for ${inputValues.people} people, based on the following information.
 
 Dietary goals:
 ${inputValues.dietaryGoals}
@@ -62,6 +62,7 @@ Requirements:
 - Avoid overly exotic or hard-to-find ingredients.
 - Meals should be suitable for normal weekday cooking (not elaborate or restaurant-style).
 - Meals should be varied and not repetitive in terms of main ingredients or cooking methods.
+- The meals and quantities should be appropriate for ${inputValues.people} people.
 
 For each meal include:
 - title
@@ -80,6 +81,63 @@ Output rules:
 - Output must strictly match the provided JSON schema
 - No commentary, no explanations, no extra text
 - Output ONLY valid JSON
+`
+
+export const generateShoppingListPrompt = (meals: any[]) => `You are given a list of meals with their ingredients.
+
+Task:
+Create a consolidated shopping list by combining all ingredients across all meals.
+
+Requirements:
+
+1. Ingredient Consolidation
+- Merge identical ingredients appearing in multiple meals.
+- Sum their quantities to produce a single total amount per ingredient.
+- Ingredient names should be normalized (e.g., "Tomatoes" and "tomato" → "tomato").
+
+2. Unit Normalization
+If the same ingredient appears with different units, convert them to a common unit before summing.
+
+Use the following standard units:
+- Weight → grams (g)
+- Volume → milliliters (ml)
+- Count → units
+
+3. Conversion Rules
+Use standard cooking conversions when needed, including but not limited to:
+- 1 kg = 1000 g
+- 1 g = 0.001 kg
+- 1 L = 1000 ml
+- 1 tbsp = 15 ml
+- 1 tsp = 5 ml
+- 1 cup = 240 ml
+- 1 cup flour = 120 g
+- 1 cup sugar = 200 g
+
+4. Categories
+Group ingredients into the following categories when applicable:
+- produce
+- dairy
+- meat
+- seafood
+- bakery
+- pantry
+- frozen
+- other
+
+5. Restrictions
+- Only include ingredients that appear in the provided meals.
+- Do NOT invent ingredients.
+- Quantities must be numeric.
+- Units must match the normalized unit system.
+
+Meals:
+${JSON.stringify(meals)}
+
+Output Rules:
+- The output MUST strictly match the provided JSON schema.
+- Do not include explanations, comments, or extra text.
+- Output ONLY valid JSON.
 `
 
 export const generateRecipesOutputSchema = {
@@ -164,6 +222,34 @@ export const generateMealsOutputSchema = {
         }
       },
       required: ["meals"]
+    }
+  }
+}
+
+export const generateShoppingListOutputSchema = {
+  format: {
+    name: "shopping_list",
+    type: "json_schema",
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        shopping_list: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              name: { type: "string" },
+              quantity: { type: "number" },
+              unit: { type: "string" },
+              category: { type: "string" },
+            },
+            required: ["name", "quantity", "unit", "category"]
+          },
+        }
+      },
+      required: ["shopping_list"]
     }
   }
 }

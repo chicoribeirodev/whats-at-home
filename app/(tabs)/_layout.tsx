@@ -38,9 +38,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="products"
+        name="shopping-list"
         options={{
-          title: 'Products',
+          title: 'Shopping List',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="bag.fill" color={color} />,
         }}
       />

@@ -13,7 +13,7 @@ export default function Recipes() {
   const [recipes, setRecipes] = useState<any[]>([]);
   const [loadingRecipes, setLoadingRecipes] = useState(false);
 
-  const { barcodes, setBarcodes, setOpenRecipe } = useContext(AppContext)
+  const { barcodes, setOpenRecipe } = useContext(AppContext);
 
   const getProductInfo = async (barcode: string) => {
     try {
