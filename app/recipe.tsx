@@ -11,10 +11,11 @@ export default function Recipe() {
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={{
-        paddingTop: 50,
+        paddingTop: 30,
+        paddingBottom: 60,
         paddingHorizontal: 16,
         minHeight: '100%',
-        gap: 16,
+        gap: 5,
         backgroundColor: "white",
       }}
     >

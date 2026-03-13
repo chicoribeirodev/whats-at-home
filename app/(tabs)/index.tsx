@@ -15,10 +15,10 @@ export default function HomeScreen() {
       }}
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">What's at Home</ThemedText>
+        <ThemedText type="title">What&apos;s at Home</ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="default">Welcome to What's at Home! We're here to make your life easier by helping you discover delicious recipes based on the ingredients you already have at home.</ThemedText>
+        <ThemedText type="default">Welcome to What&apos;s at Home! We&apos;re here to make your life easier by helping you discover delicious recipes based on the ingredients you already have at home.</ThemedText>
         <ThemedText type="subtitle">Your meal planner</ThemedText>
         <ThemedText type="default">TO DO</ThemedText>
         <ThemedText type="subtitle">Your recipes</ThemedText>

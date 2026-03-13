@@ -14,7 +14,7 @@ export default function Planner() {
     dietaryGoals: '',
     allergies: ''
   });
-  const [meals, setMeals] = useState<any[]>([]);
+  const [meals, setMeals] = useState<any[]>([] /* EXAMPLE_SUGGESTED_MEALS */);
   const [loadingMeals, setLoadingMeals] = useState(false);
 
   const { setShoppingList } = useContext(AppContext)
@@ -46,8 +46,8 @@ export default function Planner() {
       text: generateShoppingListOutputSchema as any,
     });
 
-    console.dir(response, { depth: null });
     const data = response.output_text ? JSON.parse(response.output_text) : {};
+
     setShoppingList(data?.shopping_list || []);
   };
 
@@ -92,7 +92,7 @@ export default function Planner() {
           ...inputValues,
           allergies: e.nativeEvent.text
         })} />
-        <Pressable style={styles.cameraButton} onPress={getMeals}>
+        <Pressable style={{ ...styles.cameraButton, marginTop: 10 }} onPress={getMeals}>
           <ThemedText style={styles.cameraButtonText}>🍽 Generate Meals</ThemedText>
         </Pressable>
         {loadingMeals ? (

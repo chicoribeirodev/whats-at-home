@@ -5,13 +5,18 @@ import { aiClient, MODEL } from '@/lib/open-ai-client';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { AppContext } from '../_layout';
 
 export default function Recipes() {
+  // Data states
   const [products, setProducts] = useState<any[]>([]);
   const [recipes, setRecipes] = useState<any[]>([]);
   const [loadingRecipes, setLoadingRecipes] = useState(false);
+
+  // UI states
+  const [addManuallyEnabled, setAddManuallyEnabled] = useState(false);
+  const [addManualInput, setAddManualInput] = useState({ name: '', quantity: '', unit: '' });
 
   const { barcodes, setOpenRecipe } = useContext(AppContext);
 
@@ -76,10 +81,18 @@ export default function Recipes() {
     fetchBarcodes();
   }, [barcodes?.length]);
 
-  useEffect(() => {
-    // For testing purposes, you can uncomment the following lines to pre-populate with default barcodes
-    //setBarcodes(EXAMPLE_BARCODES);
-  }, []);
+  const handleAddManualProduct = () => {
+    if (!addManualInput.name && !addManualInput.quantity && !addManualInput.unit) return;
+    const newProduct = {
+      name: addManualInput.name,
+      quantity: addManualInput.quantity,
+      unit: addManualInput.unit,
+      barcode: `manual-${Date.now()}`
+    };
+    setProducts(prev => [...prev, newProduct]);
+    setAddManualInput({ name: '', quantity: '', unit: '' });
+    setAddManuallyEnabled(false);
+  }
 
   return (
     <ScrollView
@@ -103,12 +116,39 @@ export default function Recipes() {
         <Pressable style={styles.cameraButton} onPress={() => { }}>
           <ThemedText style={styles.cameraButtonText}>🖼️ Detect products from image</ThemedText>
         </Pressable>
-        <Pressable style={styles.cameraButton} onPress={() => { }}>
+        <Pressable style={styles.cameraButton} onPress={() => setAddManuallyEnabled(!addManuallyEnabled)}>
           <ThemedText style={styles.cameraButtonText}>➕ Manual Add</ThemedText>
         </Pressable>
         {barcodes.length > 0 && <ThemedText>
           Detected barcodes: {barcodes.map(barcode => barcode).join(', ')}
         </ThemedText>}
+        {addManuallyEnabled && (
+          <View style={styles.stepContainer}>
+            <ThemedText type="defaultSemiBold">Add product manually:</ThemedText>
+            <TextInput
+              placeholder="Product name"
+              value={addManualInput.name}
+              onChangeText={(text) => setAddManualInput(prev => ({ ...prev, name: text }))}
+              style={{ borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 6 }}
+            />
+            <TextInput
+              placeholder="Quantity"
+              value={addManualInput.quantity}
+              onChangeText={(text) => setAddManualInput(prev => ({ ...prev, quantity: text }))}
+              keyboardType="numeric"
+              style={{ borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 6, marginTop: 8 }}
+            />
+            <TextInput
+              placeholder="Unit (e.g. g, ml)"
+              value={addManualInput.unit}
+              onChangeText={(text) => setAddManualInput(prev => ({ ...prev, unit: text }))}
+              style={{ borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 6, marginTop: 8 }}
+            />
+            <Pressable style={styles.cameraButton} onPress={handleAddManualProduct}>
+              <ThemedText style={styles.cameraButtonText}>Add Product</ThemedText>
+            </Pressable>
+          </View>
+        )}
         <View style={styles.productsGrid}>
           {products.map((product, index) => (
             <ThemedView key={index} style={styles.productCard}>
