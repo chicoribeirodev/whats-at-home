@@ -125,11 +125,16 @@ Group ingredients into the following categories when applicable:
 - frozen
 - other
 
-5. Restrictions
+5. Price Estimation
+- Provide an estimated price for each ingredient based on average Portuguese supermarket prices.
+- Include a unit price and a total price for the required quantity of that ingredient.
+
+6. Restrictions
 - Only include ingredients that appear in the provided meals.
 - Do NOT invent ingredients.
 - Quantities must be numeric.
 - Units must match the normalized unit system.
+- Prices should be in Euros (€)
 
 Meals:
 ${JSON.stringify(meals)}
@@ -244,8 +249,10 @@ export const generateShoppingListOutputSchema = {
               quantity: { type: "number" },
               unit: { type: "string" },
               category: { type: "string" },
+              unit_price_eur: { type: "number" },
+              total_price_eur: { type: "number" },
             },
-            required: ["name", "quantity", "unit", "category"]
+            required: ["name", "quantity", "unit", "category", "unit_price_eur", "total_price_eur"]
           },
         }
       },

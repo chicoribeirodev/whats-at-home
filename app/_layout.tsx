@@ -27,6 +27,8 @@ type ShoppingListItem = {
   quantity: number;
   unit: string;
   category: string;
+  unit_price_eur: number;
+  total_price_eur: number;
 }
 
 interface AppContextType {
@@ -52,14 +54,24 @@ export const AppContext = createContext<AppContextType>({
 });
 
 export default function RootLayout() {
-  const [barcodes, setBarcodes] = useState([]);
-  const [openRecipe, setOpenRecipe] = useState(null);
-  const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([] /* EXAMPLE_SHOPPING_LIST */);
+  const [barcodes, setBarcodes] = useState<string[]>([]);
+  const [openRecipe, setOpenRecipe] = useState<Recipe | null>(null);
+  const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
+  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
   const colorScheme = useColorScheme();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AppContext.Provider value={{ barcodes, setBarcodes, openRecipe, setOpenRecipe, shoppingList, setShoppingList }}>
+      <AppContext.Provider value={{
+        barcodes,
+        setBarcodes,
+        openRecipe,
+        setOpenRecipe,
+        shoppingList,
+        setShoppingList,
+        savedRecipes,
+        setSavedRecipes
+      }}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="barcode-scanner" options={{ title: 'Scan Barcode' }} />
