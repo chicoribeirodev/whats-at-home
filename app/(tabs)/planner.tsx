@@ -115,6 +115,9 @@ export default function Planner() {
               }}>
                 <ThemedText style={styles.recipeButtonText}>View Instructions</ThemedText>
               </Pressable>
+              <Pressable style={styles.recipeButton} onPress={() => { }}>
+                <ThemedText style={styles.recipeButtonText}>Regenerate and Replace</ThemedText>
+              </Pressable>
             </ThemedView>
           ))
         )}
