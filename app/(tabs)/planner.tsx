@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { generateMealsOutputSchema, generateMealsPrompt, generateShoppingListOutputSchema, generateShoppingListPrompt } from '@/constants/prompts';
 import { aiClient, MODEL } from '@/lib/open-ai-client';
+import { router } from 'expo-router';
 import { useContext, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { AppContext } from '../_layout';
@@ -14,13 +15,13 @@ export default function Planner() {
     dietaryGoals: '',
     allergies: ''
   });
-  const [meals, setMeals] = useState<any[]>([] /* EXAMPLE_SUGGESTED_MEALS */);
+  const [meals, setMeals] = useState<any[]>([] /* EXAMPLE_MEAL_RECIPES */);
   const [loadingMeals, setLoadingMeals] = useState(false);
 
-  const { setShoppingList } = useContext(AppContext)
+  const { setShoppingList, setOpenRecipe } = useContext(AppContext)
 
-  const getMeals = async () => {
-    console.log('Generating meals:');
+  const getMealRecipes = async () => {
+    console.log('Generating meals and recipes:');
     setLoadingMeals(true);
 
     const response = await aiClient.responses.create({
@@ -48,7 +49,9 @@ export default function Planner() {
 
     const data = response.output_text ? JSON.parse(response.output_text) : {};
 
-    setShoppingList(data?.shopping_list || []);
+    setShoppingList(data?.shopping_list || [])
+
+    alert('Meal ingredients added to shopping list!');
   };
 
   return (
@@ -92,7 +95,7 @@ export default function Planner() {
           ...inputValues,
           allergies: e.nativeEvent.text
         })} />
-        <Pressable style={{ ...styles.cameraButton, marginTop: 10 }} onPress={getMeals}>
+        <Pressable style={{ ...styles.cameraButton, marginTop: 10 }} onPress={getMealRecipes}>
           <ThemedText style={styles.cameraButtonText}>🍽 Generate Meals</ThemedText>
         </Pressable>
         {loadingMeals ? (
@@ -106,10 +109,12 @@ export default function Planner() {
               {meal.ingredients.map((ingredient: any, idx: number) => (
                 <ThemedText key={`ingredient-${idx}`} type="default">- {ingredient.quantity} {ingredient.unit} {ingredient.name}</ThemedText>
               ))}
-              <ThemedText type="defaultSemiBold">Instructions:</ThemedText>
-              {meal.steps.map((step: string, idx: number) => (
-                <ThemedText key={`step-${idx}`} type="default">{idx + 1}. {step}</ThemedText>
-              ))}
+              <Pressable style={styles.recipeButton} onPress={() => {
+                setOpenRecipe(meal);
+                router.push('/recipe');
+              }}>
+                <ThemedText style={styles.recipeButtonText}>View Instructions</ThemedText>
+              </Pressable>
             </ThemedView>
           ))
         )}
@@ -156,4 +161,18 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
   },
+  recipeButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+  recipeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  }
 });

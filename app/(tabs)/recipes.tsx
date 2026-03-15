@@ -172,10 +172,18 @@ export default function Recipes() {
         {recipes.map((recipe, index) => (
           <ThemedView key={index} style={{ marginTop: 16 }}>
             <ThemedText type="title">{recipe.title}</ThemedText>
+            <ThemedText type="default">{recipe.description}</ThemedText>
             <ThemedText type="subtitle" style={{ marginTop: 8 }}>Ingredients:</ThemedText>
-            {recipe.ingredients.map((ingredient: string, idx: number) => (
-              <ThemedText key={idx}>- {ingredient}</ThemedText>
+            {recipe.ingredients.map((ingredient: any, idx: number) => (
+              <ThemedText key={idx} type="default">- {ingredient.quantity} {ingredient.unit} {ingredient.name}</ThemedText>
             ))}
+            {recipe?.if_you_also_have.length > 0 && (<>
+              <ThemedText type="subtitle" style={{ marginTop: 8 }}>If you also have:</ThemedText>
+              {recipe.if_you_also_have.map((ingredient: string, idx: number) => (
+                <ThemedText key={`if-you-also-have-${idx}`} type="default">- {ingredient}</ThemedText>
+              ))}
+            </>
+            )}
             <ThemedText type="subtitle" style={{ marginTop: 8 }}>Difficulty: {recipe.difficulty}</ThemedText>
             <ThemedText type="subtitle" style={{ marginTop: 8 }}>Time to make: {recipe.time_to_make_minutes} minutes</ThemedText>
             <ThemedText type="subtitle" style={{ marginTop: 8 }}>Best time of day: {recipe.time_of_day}</ThemedText>

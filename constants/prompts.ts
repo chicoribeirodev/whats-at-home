@@ -70,6 +70,9 @@ For each meal include:
 - type_of_meal (lunch or dinner)
 - list of ingredients with quantity and unit
 - step-by-step cooking instructions
+- difficulty level (easy, medium, hard)
+- estimated time to make in minutes
+- estimated calories and calories unit
 
 Additional guidelines:
 - Prioritize balanced meals with protein, vegetables, and complex carbohydrates when possible.
@@ -160,9 +163,19 @@ export const generateRecipesOutputSchema = {
             additionalProperties: false,
             properties: {
               title: { type: "string" },
+              description: { type: "string" },
               ingredients: {
                 type: "array",
-                items: { type: "string" }
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    name: { type: "string" },
+                    quantity: { type: "number" },
+                    unit: { type: "string" }
+                  },
+                  required: ["name", "quantity", "unit"]
+                }
               },
               instructions: {
                 type: "array",
@@ -178,7 +191,7 @@ export const generateRecipesOutputSchema = {
                 items: { type: "string" },
               }
             },
-            required: ["title", "ingredients", "instructions", "difficulty", "time_to_make_minutes", "time_of_day", "calories", "calories_unit", "if_you_also_have"]
+            required: ["title", "description", "ingredients", "instructions", "difficulty", "time_to_make_minutes", "time_of_day", "calories", "calories_unit", "if_you_also_have"]
           },
         }
       },
@@ -217,12 +230,16 @@ export const generateMealsOutputSchema = {
                   required: ["name", "quantity", "unit"]
                 }
               },
-              steps: {
+              instructions: {
                 type: "array",
                 items: { type: "string" }
-              }
+              },
+              difficulty: { type: "string" },
+              time_to_make_minutes: { type: "number" },
+              calories: { type: "number" },
+              calories_unit: { type: "string" },
             },
-            required: ["title", "description", "type_of_meal", "ingredients", "steps"]
+            required: ["title", "description", "type_of_meal", "ingredients", "instructions", "difficulty", "time_to_make_minutes", "calories", "calories_unit"]
           },
         }
       },

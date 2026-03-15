@@ -12,13 +12,19 @@ export const unstable_settings = {
 
 type Recipe = {
   title: string;
-  ingredients: string[];
+  description: string;
+  ingredients: {
+    name: string;
+    quantity: number;
+    unit: string;
+  }[];
   instructions: string[];
   difficulty: string;
   time_to_make_minutes: number;
-  time_of_day: string;
   calories: number;
   calories_unit: string;
+  time_of_day?: string;
+  type_of_meal?: string;
   if_you_also_have?: string[];
 }
 
