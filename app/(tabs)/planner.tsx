@@ -1,6 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { EXAMPLE_MEAL_RECIPES } from '@/constants/example-data';
 import { generateMealsOutputSchema, generateMealsPrompt, generateShoppingListOutputSchema, generateShoppingListPrompt, regenerateMealRecipePrompt } from '@/constants/prompts';
 import { aiClient, MODEL } from '@/lib/open-ai-client';
 import { router } from 'expo-router';
@@ -16,7 +15,7 @@ export default function Planner() {
     dietaryGoals: '',
     allergies: ''
   });
-  const [meals, setMeals] = useState<any[]>(EXAMPLE_MEAL_RECIPES);
+  const [meals, setMeals] = useState<any[]>([] /* EXAMPLE_MEAL_RECIPES */);
   const [loadingMeals, setLoadingMeals] = useState(false);
 
   const { setShoppingList, setOpenRecipe } = useContext(AppContext)
