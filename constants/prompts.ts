@@ -86,6 +86,40 @@ Output rules:
 - Output ONLY valid JSON
 `
 
+export const regenerateMealRecipePrompt = (meal: any, otherMeals: any[]) => `Regenerate the recipe for the following meal, keeping the same type of meal (lunch or dinner) and the same dietary goals and restrictions, but providing a completely different recipe that does not repeat the main protein or dish style. The new recipe should still be practical and easy to cook at home, with a cooking time ideally under 40 minutes, and using ingredients that are easy to find in Portugal.
+
+Meal to regenerate:
+${JSON.stringify(meal)}
+
+Dietary goals:
+${meal.dietary_goals}
+
+Allergies or restrictions:
+${meal.allergies}
+
+Other meals in the plan (for reference, to avoid repetition):
+${JSON.stringify(otherMeals)}
+
+Requirements:
+- Meal should be practical and easy to cook at home.
+- Cooking time should ideally be under 40 minutes.
+- Prefer simple techniques suitable for beginner to intermediate cooks.
+- Avoid repeating the same main protein or dish style as the original meal.
+- Use ingredients that are easy to find in Portugal (e.g., typical supermarkets like Continente, Pingo Doce, Lidl).
+- Favor Mediterranean-style meals and ingredients common in Portuguese kitchens when possible.
+- Assume the user already has basic pantry staples: salt, pepper, olive oil, cooking oil, onion, and garlic.
+- Meal should be balanced and include a good mix of protein, vegetables, and carbohydrates when possible.
+- Minimize food waste by reusing ingredients across meals when appropriate.
+- Avoid overly exotic or hard-to-find ingredients.
+- Meal should be suitable for normal weekday cooking (not elaborate or restaurant-style).
+- Meal should be varied and not repetitive in terms of main ingredients or cooking methods compared to the original meal.
+
+Output rules:
+- Output must strictly match the provided JSON schema
+- No commentary, no explanations, no extra text
+- Output ONLY valid JSON
+`
+
 export const generateShoppingListPrompt = (meals: any[]) => `You are given a list of meals with their ingredients.
 
 Task:

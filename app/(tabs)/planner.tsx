@@ -1,10 +1,11 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { generateMealsOutputSchema, generateMealsPrompt, generateShoppingListOutputSchema, generateShoppingListPrompt } from '@/constants/prompts';
+import { EXAMPLE_MEAL_RECIPES } from '@/constants/example-data';
+import { generateMealsOutputSchema, generateMealsPrompt, generateShoppingListOutputSchema, generateShoppingListPrompt, regenerateMealRecipePrompt } from '@/constants/prompts';
 import { aiClient, MODEL } from '@/lib/open-ai-client';
 import { router } from 'expo-router';
 import { useContext, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { AppContext } from '../_layout';
 
 export default function Planner() {
@@ -15,7 +16,7 @@ export default function Planner() {
     dietaryGoals: '',
     allergies: ''
   });
-  const [meals, setMeals] = useState<any[]>([] /* EXAMPLE_MEAL_RECIPES */);
+  const [meals, setMeals] = useState<any[]>(EXAMPLE_MEAL_RECIPES);
   const [loadingMeals, setLoadingMeals] = useState(false);
 
   const { setShoppingList, setOpenRecipe } = useContext(AppContext)
@@ -34,6 +35,37 @@ export default function Planner() {
 
     setMeals(data?.meals || []);
     setLoadingMeals(false);
+  };
+
+  const regenerateMealRecipe = async (mealIndex: number) => {
+    console.log(`Regenerating meal at index ${mealIndex}...`);
+
+    const mealToRegenerate = meals[mealIndex];
+    if (!mealToRegenerate) {
+      console.error('Meal to regenerate not found at index:', mealIndex);
+      return;
+    }
+
+    const otherMeals = meals.filter((_, idx) => idx !== mealIndex).map((meal) => ({ title: meal.title, ingredients: meal.ingredients }));
+
+    const response = await aiClient.responses.create({
+      model: MODEL,
+      input: regenerateMealRecipePrompt(mealToRegenerate, otherMeals),
+      text: generateMealsOutputSchema as any,
+    });
+
+    const data = response.output_text ? JSON.parse(response.output_text) : {};
+    const newMeal = data?.meals ? data.meals[0] : null;
+
+    if (newMeal) {
+      setMeals((prevMeals) => {
+        const updatedMeals = [...prevMeals];
+        updatedMeals[mealIndex] = newMeal;
+        return updatedMeals;
+      });
+    } else {
+      console.error('Failed to regenerate meal. No meal data returned from AI response.');
+    }
   };
 
   const addToCalendar = () => { console.log('Adding meals to calendar...') };
@@ -103,7 +135,15 @@ export default function Planner() {
         ) : (
           meals.length > 0 && meals.map((meal: any, index: number) => (
             <ThemedView key={`meal-${index}`} style={{ padding: 16, backgroundColor: '#f0f0f0', borderRadius: 8 }}>
-              <ThemedText type="subtitle">{meal.title} ({meal.type_of_meal})</ThemedText>
+              <View style={{ flexDirection: 'row', marginBottom: 8, justifyContent: 'space-between' }}>
+                <View style={{}}>
+                  <Text>{meal.type_of_meal}</Text>
+                </View>
+                <View>
+                  <Text style={{ textDecorationLine: 'underline' }} onPress={() => regenerateMealRecipe(index)}>regenerate</Text>
+                </View>
+              </View>
+              <ThemedText type="subtitle">{meal.title}</ThemedText>
               <ThemedText type="default">{meal.description}</ThemedText>
               <ThemedText type="defaultSemiBold">Ingredients:</ThemedText>
               {meal.ingredients.map((ingredient: any, idx: number) => (
@@ -114,9 +154,6 @@ export default function Planner() {
                 router.push('/recipe');
               }}>
                 <ThemedText style={styles.recipeButtonText}>View Instructions</ThemedText>
-              </Pressable>
-              <Pressable style={styles.recipeButton} onPress={() => { }}>
-                <ThemedText style={styles.recipeButtonText}>Regenerate and Replace</ThemedText>
               </Pressable>
             </ThemedView>
           ))
