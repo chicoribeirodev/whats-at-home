@@ -62,7 +62,7 @@ export const AppContext = createContext<AppContextType>({
 export default function RootLayout() {
   const [barcodes, setBarcodes] = useState<string[]>([]);
   const [openRecipe, setOpenRecipe] = useState<Recipe | null>(null);
-  const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
+  const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([] /* EXAMPLE_SHOPPING_LIST */);
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
   const colorScheme = useColorScheme();
 
