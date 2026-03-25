@@ -1,10 +1,10 @@
+import { testDatabase } from '@/database';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { createContext, useEffect, useState } from 'react';
 import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { createContext, useState } from 'react';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -65,6 +65,19 @@ export default function RootLayout() {
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([] /* EXAMPLE_SHOPPING_LIST */);
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    const initDB = async () => {
+      try {
+        await testDatabase();
+        console.log('Database initialized successfully!');
+      } catch (error) {
+        console.error('Error initializing database:', error);
+      }
+    };
+
+    initDB();
+  }, []);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
