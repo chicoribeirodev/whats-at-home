@@ -1,6 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { generateMealsOutputSchema, generateMealsPrompt, generateShoppingListOutputSchema, generateShoppingListPrompt, regenerateMealRecipePrompt } from '@/constants/prompts';
+import { addItemsToShoppingList } from '@/database';
 import { aiClient, MODEL } from '@/lib/open-ai-client';
 import { router } from 'expo-router';
 import { useContext, useState } from 'react';
@@ -80,7 +81,8 @@ export default function Planner() {
 
     const data = response.output_text ? JSON.parse(response.output_text) : {};
 
-    setShoppingList(data?.shopping_list || [])
+    setShoppingList(data?.shopping_list || []);
+    addItemsToShoppingList(data?.shopping_list || []);
 
     alert('Meal ingredients added to shopping list!');
   };

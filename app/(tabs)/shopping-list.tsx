@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { clearShoppingList as clearShoppingListDB, removeShoppingListItem as removeShoppingListItemDB } from '@/database';
 import { Picker } from '@react-native-picker/picker';
 import { useContext, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -13,15 +14,22 @@ export default function ShoppingList() {
 
   const totalPrice = shoppingList.reduce((sum, item) => sum + item.total_price_eur, 0).toFixed(2);
 
-  const removeItemFromShoppingList = (item: any) => {
+  const removeShoppingListItem = (item: any) => {
     const updatedList = shoppingList.filter((i) => i !== item);
     setShoppingList(updatedList);
+    removeShoppingListItemDB(item.id!);
   };
 
   const addItemToShoppingList = (item: any) => {
     console.log('Adding item to shopping list:', item);
     /* setAddManualInput({ name: '', quantity: '', unit: '' });
     setShoppingList([...shoppingList, item]); */
+  };
+
+  const clearShoppingList = () => {
+    console.log('Clearing shopping list...');
+    setShoppingList([]);
+    clearShoppingListDB();
   };
 
   const sortedShoppingList = [...shoppingList].sort((a, b) => {
@@ -94,6 +102,8 @@ export default function ShoppingList() {
               <Picker.Item label="Category" value="category" />
               <Picker.Item label="Price" value="price" />
             </Picker>
+            <View style={{ flexDirection: 'row', marginBottom: 8, gap: 8, justifyContent: 'flex-end' }}>
+              <ThemedText type="defaultSemiBold" onPress={() => clearShoppingList()}>Clear List</ThemedText></View>
             {sortedShoppingList.map((item, index) => (
               <ThemedView key={index} style={{ padding: 16, backgroundColor: '#f0f0f0', borderRadius: 8 }}>
                 <ThemedText type="subtitle">{item.name}</ThemedText>
@@ -105,7 +115,7 @@ export default function ShoppingList() {
                     <Text style={{ textDecorationLine: 'underline' }}>modify</Text>
                   </View>
                   <View>
-                    <Text style={{ textDecorationLine: 'underline' }} onPress={() => removeItemFromShoppingList(item)}>remove</Text>
+                    <Text style={{ textDecorationLine: 'underline' }} onPress={() => removeShoppingListItem(item)}>remove</Text>
                   </View>
                 </View>
               </ThemedView>

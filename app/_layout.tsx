@@ -1,4 +1,4 @@
-import { testDatabase } from '@/database';
+import { getShoppingList, initDatabase, seedDatabase } from '@/database';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -11,6 +11,7 @@ export const unstable_settings = {
 };
 
 type Recipe = {
+  id?: number;
   title: string;
   description: string;
   ingredients: {
@@ -29,6 +30,7 @@ type Recipe = {
 }
 
 type ShoppingListItem = {
+  id?: number;
   name: string;
   quantity: number;
   unit: string;
@@ -69,14 +71,35 @@ export default function RootLayout() {
   useEffect(() => {
     const initDB = async () => {
       try {
-        await testDatabase();
+        await initDatabase();
         console.log('Database initialized successfully!');
       } catch (error) {
         console.error('Error initializing database:', error);
       }
     };
 
+    const seedDB = async () => {
+      try {
+        await seedDatabase();
+        console.log('Seeding database with initial data...');
+      } catch (error) {
+        console.error('Error seeding database:', error);
+      }
+    }
+
+    const updateShoppingList = async () => {
+      try {
+        console.log('Fetching shopping list from database...');
+        const items = await getShoppingList();
+        setShoppingList(items as ShoppingListItem[]);
+      } catch (error) {
+        console.error('Error fetching shopping list:', error);
+      }
+    };
+
     initDB();
+    updateShoppingList();
+
   }, []);
 
   return (
