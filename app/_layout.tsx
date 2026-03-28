@@ -10,7 +10,7 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-type Recipe = {
+export type Recipe = {
   id?: number;
   title: string;
   description: string;
@@ -29,7 +29,7 @@ type Recipe = {
   if_you_also_have?: string[];
 }
 
-type ShoppingListItem = {
+export type ShoppingListItem = {
   id?: number;
   name: string;
   quantity: number;

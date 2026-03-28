@@ -1,10 +1,10 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { clearShoppingList as clearShoppingListDB, removeShoppingListItem as removeShoppingListItemDB } from '@/database';
+import { clearShoppingList as clearShoppingListDB, getShoppingList, removeShoppingListItem as removeShoppingListItemDB } from '@/database';
 import { Picker } from '@react-native-picker/picker';
 import { useContext, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { AppContext } from '../_layout';
+import { AppContext, ShoppingListItem } from '../_layout';
 
 export default function ShoppingList() {
   const [addManuallyEnabled, setAddManuallyEnabled] = useState(false);
@@ -14,10 +14,11 @@ export default function ShoppingList() {
 
   const totalPrice = shoppingList.reduce((sum, item) => sum + item.total_price_eur, 0).toFixed(2);
 
-  const removeShoppingListItem = (item: any) => {
-    const updatedList = shoppingList.filter((i) => i !== item);
-    setShoppingList(updatedList);
-    removeShoppingListItemDB(item.id!);
+  const removeShoppingListItem = async (item: any) => {
+    console.log('Removing item from shopping list:', item);
+    await removeShoppingListItemDB(item.id!);
+    const items = await getShoppingList();
+    setShoppingList(items as ShoppingListItem[]);
   };
 
   const addItemToShoppingList = (item: any) => {

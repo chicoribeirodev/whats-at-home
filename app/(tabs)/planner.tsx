@@ -1,12 +1,12 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { generateMealsOutputSchema, generateMealsPrompt, generateShoppingListOutputSchema, generateShoppingListPrompt, regenerateMealRecipePrompt } from '@/constants/prompts';
-import { addItemsToShoppingList } from '@/database';
+import { addItemsToShoppingList, getShoppingList } from '@/database';
 import { aiClient, MODEL } from '@/lib/open-ai-client';
 import { router } from 'expo-router';
 import { useContext, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { AppContext } from '../_layout';
+import { AppContext, ShoppingListItem } from '../_layout';
 
 export default function Planner() {
   const [inputValues, setInputValues] = useState({
@@ -81,8 +81,10 @@ export default function Planner() {
 
     const data = response.output_text ? JSON.parse(response.output_text) : {};
 
-    setShoppingList(data?.shopping_list || []);
-    addItemsToShoppingList(data?.shopping_list || []);
+    await addItemsToShoppingList(data?.shopping_list || []);
+
+    const items = await getShoppingList();
+    setShoppingList(items as ShoppingListItem[]);
 
     alert('Meal ingredients added to shopping list!');
   };
