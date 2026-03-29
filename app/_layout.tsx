@@ -1,4 +1,4 @@
-import { getShoppingList, initDatabase, seedDatabase } from '@/database';
+import { getAllRecipes, getShoppingList, initDatabase } from '@/database';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -11,7 +11,7 @@ export const unstable_settings = {
 };
 
 export type Recipe = {
-  id?: number;
+  id: number;
   title: string;
   description: string;
   ingredients: {
@@ -30,7 +30,7 @@ export type Recipe = {
 }
 
 export type ShoppingListItem = {
-  id?: number;
+  id: number;
   name: string;
   quantity: number;
   unit: string;
@@ -78,16 +78,17 @@ export default function RootLayout() {
       }
     };
 
-    const seedDB = async () => {
+    const loadSavedRecipes = async () => {
       try {
-        await seedDatabase();
-        console.log('Seeding database with initial data...');
+        console.log('Fetching saved recipes from database...');
+        const recipes = await getAllRecipes();
+        setSavedRecipes(recipes as Recipe[]);
       } catch (error) {
-        console.error('Error seeding database:', error);
+        console.error('Error fetching saved recipes:', error);
       }
-    }
+    };
 
-    const updateShoppingList = async () => {
+    const loadShoppingList = async () => {
       try {
         console.log('Fetching shopping list from database...');
         const items = await getShoppingList();
@@ -98,8 +99,8 @@ export default function RootLayout() {
     };
 
     initDB();
-    updateShoppingList();
-
+    loadSavedRecipes();
+    loadShoppingList();
   }, []);
 
   return (
@@ -118,6 +119,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="barcode-scanner" options={{ title: 'Scan Barcode' }} />
           <Stack.Screen name="recipe" options={{ title: 'Recipe Details' }} />
+          <Stack.Screen name="generate-recipes" options={{ title: 'Generate Recipes' }} />
         </Stack>
       </AppContext.Provider>
       <StatusBar style="auto" />

@@ -136,6 +136,33 @@ export const addRecipe = async (recipe: any) => {
   );
 };
 
+export const addRecipes = async (recipes: any[]) => {
+  const placeholders = recipes.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ');
+  const values = recipes.flatMap(recipe => [
+    recipe.title,
+    recipe.description,
+    JSON.stringify(recipe.ingredients),
+    JSON.stringify(recipe.instructions),
+    recipe.difficulty,
+    recipe.time_to_make_minutes,
+    recipe.calories,
+    recipe.calories_unit,
+    recipe.time_of_day || null,
+    recipe.type_of_meal || null,
+    recipe.if_you_also_have ? JSON.stringify(recipe.if_you_also_have) : null,
+  ]);
+  await db.runAsync(
+    `INSERT INTO recipes (title, description, ingredients, instructions, difficulty, time_to_make_minutes, calories, calories_unit, time_of_day, type_of_meal, if_you_also_have) VALUES ${placeholders}`,
+    values
+  );
+  console.log(`Added ${recipes.length} recipes to database.`);
+};
+
+export const deleteRecipe = async (id: number) => {
+  await db.runAsync('DELETE FROM recipes WHERE id = ?', [id]);
+  console.log(`Recipe with id ${id} removed from database.`);
+};
+
 export const addShoppingListItem = async (item: any) => {
   await db.runAsync(
     'INSERT INTO shopping_list (name, quantity, unit, category, unit_price_eur, total_price_eur) VALUES (?, ?, ?, ?, ?, ?)',

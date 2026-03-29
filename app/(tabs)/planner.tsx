@@ -1,12 +1,12 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { generateMealsOutputSchema, generateMealsPrompt, generateShoppingListOutputSchema, generateShoppingListPrompt, regenerateMealRecipePrompt } from '@/constants/prompts';
-import { addItemsToShoppingList, getShoppingList } from '@/database';
+import { addItemsToShoppingList, addRecipe, addRecipes, getAllRecipes, getShoppingList } from '@/database';
 import { aiClient, MODEL } from '@/lib/open-ai-client';
 import { router } from 'expo-router';
 import { useContext, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { AppContext, ShoppingListItem } from '../_layout';
+import { AppContext, Recipe, ShoppingListItem } from '../_layout';
 
 export default function Planner() {
   const [inputValues, setInputValues] = useState({
@@ -19,10 +19,12 @@ export default function Planner() {
   const [meals, setMeals] = useState<any[]>([] /* EXAMPLE_MEAL_RECIPES */);
   const [loadingMeals, setLoadingMeals] = useState(false);
 
-  const { setShoppingList, setOpenRecipe } = useContext(AppContext)
+  const { setSavedRecipes, setShoppingList, setOpenRecipe } = useContext(AppContext)
 
   const getMealRecipes = async () => {
     console.log('Generating meals and recipes:');
+
+    setMeals([]);
     setLoadingMeals(true);
 
     const response = await aiClient.responses.create({
@@ -69,6 +71,54 @@ export default function Planner() {
   };
 
   const addToCalendar = () => { console.log('Adding meals to calendar...') };
+
+  const saveRecipe = async (recipe: Recipe) => {
+    console.log('Saving recipe to list...', recipe.title)
+
+    await addRecipe({
+      title: recipe.title,
+      description: recipe.description,
+      ingredients: recipe.ingredients,
+      instructions: recipe.instructions,
+      difficulty: recipe.difficulty,
+      time_to_make_minutes: recipe.time_to_make_minutes,
+      calories: recipe.calories,
+      calories_unit: recipe.calories_unit,
+      time_of_day: recipe.time_of_day,
+      type_of_meal: recipe.type_of_meal,
+      if_you_also_have: recipe.if_you_also_have,
+    });
+
+    const items = await getAllRecipes();
+
+    setSavedRecipes(items as Recipe[]);
+
+    alert('Recipe saved! You can find it in the Recipes tab.');
+  };
+
+  const saveRecipes = async () => {
+    console.log('Saving meals to list...')
+
+    await addRecipes(meals.map((meal) => ({
+      title: meal.title,
+      description: meal.description,
+      ingredients: meal.ingredients,
+      instructions: meal.instructions,
+      difficulty: meal.difficulty,
+      time_to_make_minutes: meal.time_to_make_minutes,
+      calories: meal.calories,
+      calories_unit: meal.calories_unit,
+      time_of_day: meal.time_of_day,
+      type_of_meal: meal.type_of_meal,
+      if_you_also_have: meal.if_you_also_have,
+    })));
+
+    const items = await getAllRecipes();
+
+    setSavedRecipes(items as Recipe[]);
+
+    alert('Recipes saved! You can find them in the Recipes tab.');
+  };
 
   const addToShoppingList = async () => {
     console.log('Adding meals to shopping list...')
@@ -142,8 +192,13 @@ export default function Planner() {
                 <View style={{}}>
                   <Text>{meal.type_of_meal}</Text>
                 </View>
-                <View>
-                  <Text style={{ textDecorationLine: 'underline' }} onPress={() => regenerateMealRecipe(index)}>regenerate</Text>
+                <View style={{ flexDirection: 'row', gap: 16 }}>
+                  <View>
+                    <Text style={{ textDecorationLine: 'underline' }} onPress={() => regenerateMealRecipe(index)}>regenerate</Text>
+                  </View>
+                  <View>
+                    <Text style={{ textDecorationLine: 'underline' }} onPress={() => saveRecipe(meal)}>save</Text>
+                  </View>
                 </View>
               </View>
               <ThemedText type="subtitle">{meal.title}</ThemedText>
@@ -165,6 +220,9 @@ export default function Planner() {
           <>
             <Pressable style={styles.cameraButton} onPress={addToCalendar}>
               <ThemedText style={styles.cameraButtonText}>🗓 Add to Calendar</ThemedText>
+            </Pressable>
+            <Pressable style={styles.cameraButton} onPress={saveRecipes}>
+              <ThemedText style={styles.cameraButtonText}>💾 Save Recipes</ThemedText>
             </Pressable>
             <Pressable style={styles.cameraButton} onPress={addToShoppingList}>
               <ThemedText style={styles.cameraButtonText}>🛒 Add to Shopping List</ThemedText>
