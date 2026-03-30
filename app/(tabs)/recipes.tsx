@@ -27,16 +27,13 @@ export default function Recipes() {
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={{
-        paddingTop: 50,
+        paddingTop: 20,
         paddingHorizontal: 16,
         minHeight: '100%',
         gap: 16,
         backgroundColor: "white",
       }}
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Recipes</ThemedText>
-      </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <Pressable style={{ ...styles.button, marginBottom: 12 }} onPress={() => router.push('/generate-recipes')}>
           <ThemedText style={styles.buttonText}>🤖 Generate New Recipes</ThemedText>
@@ -74,11 +71,6 @@ export default function Recipes() {
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
   stepContainer: {
     gap: 8,
     marginBottom: 8,

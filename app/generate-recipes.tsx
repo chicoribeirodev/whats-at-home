@@ -98,26 +98,23 @@ export default function Recipes() {
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={{
-        paddingTop: 50,
+        paddingTop: 20,
         paddingHorizontal: 16,
         minHeight: '100%',
         gap: 16,
         backgroundColor: "white",
       }}
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Recipes</ThemedText>
-      </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="defaultSemiBold">Generate your recipes based on the products you have.</ThemedText>
-        <Pressable style={styles.cameraButton} onPress={() => router.push('/barcode-scanner')}>
-          <ThemedText style={styles.cameraButtonText}>📷 Scan product barcodes</ThemedText>
+        <Pressable style={styles.button} onPress={() => router.push('/barcode-scanner')}>
+          <ThemedText style={styles.buttonText}>📷 Scan product barcodes</ThemedText>
         </Pressable>
-        <Pressable style={styles.cameraButton} onPress={() => { }}>
-          <ThemedText style={styles.cameraButtonText}>🖼️ Detect products from image</ThemedText>
+        <Pressable style={styles.button} onPress={() => { }}>
+          <ThemedText style={styles.buttonText}>🖼️ Detect products from image</ThemedText>
         </Pressable>
-        <Pressable style={styles.cameraButton} onPress={() => setAddManuallyEnabled(!addManuallyEnabled)}>
-          <ThemedText style={styles.cameraButtonText}>➕ Manual Add</ThemedText>
+        <Pressable style={styles.button} onPress={() => setAddManuallyEnabled(!addManuallyEnabled)}>
+          <ThemedText style={styles.buttonText}>➕ Manual Add</ThemedText>
         </Pressable>
         {barcodes.length > 0 && <ThemedText>
           Detected barcodes: {barcodes.map(barcode => barcode).join(', ')}
@@ -144,8 +141,8 @@ export default function Recipes() {
               onChangeText={(text) => setAddManualInput(prev => ({ ...prev, unit: text }))}
               style={{ borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 6, marginTop: 8 }}
             />
-            <Pressable style={styles.cameraButton} onPress={handleAddManualProduct}>
-              <ThemedText style={styles.cameraButtonText}>Add Product</ThemedText>
+            <Pressable style={styles.button} onPress={handleAddManualProduct}>
+              <ThemedText style={styles.buttonText}>Add Product</ThemedText>
             </Pressable>
           </View>
         )}
@@ -165,8 +162,8 @@ export default function Recipes() {
             </ThemedView>
           ))}
         </View>
-        {products.length > 0 && <Pressable style={styles.cameraButton} onPress={getRecipes}>
-          <ThemedText style={styles.cameraButtonText}>Get recipes</ThemedText>
+        {products.length > 0 && <Pressable style={styles.button} onPress={getRecipes}>
+          <ThemedText style={styles.buttonText}>Get recipes</ThemedText>
         </Pressable>}
         {loadingRecipes && <ThemedText>Loading recipes...</ThemedText>}
         {recipes.map((recipe, index) => (
@@ -201,11 +198,6 @@ export default function Recipes() {
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
   stepContainer: {
     gap: 8,
     marginBottom: 8,
@@ -226,7 +218,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     borderRadius: 6,
   },
-  cameraButton: {
+  button: {
     backgroundColor: '#007AFF',
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -234,7 +226,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cameraButtonText: {
+  buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',

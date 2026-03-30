@@ -143,16 +143,13 @@ export default function Planner() {
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={{
-        paddingTop: 50,
+        paddingTop: 20,
         paddingHorizontal: 16,
         minHeight: '100%',
         gap: 16,
         backgroundColor: "white",
       }}
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Meal Planner</ThemedText>
-      </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="defaultSemiBold">Plan your next meals.</ThemedText>
         <ThemedText type="default">Number of people:</ThemedText>
@@ -180,8 +177,8 @@ export default function Planner() {
           ...inputValues,
           allergies: e.nativeEvent.text
         })} />
-        <Pressable style={{ ...styles.cameraButton, marginTop: 10 }} onPress={getMealRecipes}>
-          <ThemedText style={styles.cameraButtonText}>🍽 Generate Meals</ThemedText>
+        <Pressable style={{ ...styles.button, marginTop: 10 }} onPress={getMealRecipes}>
+          <ThemedText style={styles.buttonText}>🍽 Generate Meals</ThemedText>
         </Pressable>
         {loadingMeals ? (
           <ThemedText type="defaultSemiBold">Generating your meal plan...</ThemedText>
@@ -218,14 +215,14 @@ export default function Planner() {
         )}
         {meals.length > 0 && (
           <>
-            <Pressable style={styles.cameraButton} onPress={addToCalendar}>
-              <ThemedText style={styles.cameraButtonText}>🗓 Add to Calendar</ThemedText>
+            <Pressable style={styles.button} onPress={addToCalendar}>
+              <ThemedText style={styles.buttonText}>🗓 Add to Calendar</ThemedText>
             </Pressable>
-            <Pressable style={styles.cameraButton} onPress={saveRecipes}>
-              <ThemedText style={styles.cameraButtonText}>💾 Save Recipes</ThemedText>
+            <Pressable style={styles.button} onPress={saveRecipes}>
+              <ThemedText style={styles.buttonText}>💾 Save Recipes</ThemedText>
             </Pressable>
-            <Pressable style={styles.cameraButton} onPress={addToShoppingList}>
-              <ThemedText style={styles.cameraButtonText}>🛒 Add to Shopping List</ThemedText>
+            <Pressable style={styles.button} onPress={addToShoppingList}>
+              <ThemedText style={styles.buttonText}>🛒 Add to Shopping List</ThemedText>
             </Pressable>
           </>
         )}
@@ -235,16 +232,11 @@ export default function Planner() {
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
   stepContainer: {
     gap: 8,
     marginBottom: 8,
   },
-  cameraButton: {
+  button: {
     backgroundColor: '#007AFF',
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -252,7 +244,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cameraButtonText: {
+  buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',

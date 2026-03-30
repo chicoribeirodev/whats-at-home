@@ -48,19 +48,16 @@ export default function ShoppingList() {
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={{
-        paddingTop: 50,
+        paddingTop: 20,
         paddingHorizontal: 16,
         minHeight: '100%',
         gap: 16,
         backgroundColor: "white",
       }}
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Shopping List</ThemedText>
-      </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <Pressable style={styles.cameraButton} onPress={() => setAddManuallyEnabled(!addManuallyEnabled)}>
-          <ThemedText style={styles.cameraButtonText}>➕ Manual Add</ThemedText>
+        <Pressable style={styles.button} onPress={() => setAddManuallyEnabled(!addManuallyEnabled)}>
+          <ThemedText style={styles.buttonText}>➕ Manual Add</ThemedText>
         </Pressable>
         {addManuallyEnabled && (
           <View style={styles.stepContainer}>
@@ -84,8 +81,8 @@ export default function ShoppingList() {
               onChangeText={(text) => setAddManualInput(prev => ({ ...prev, unit: text }))}
               style={{ borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 6, marginTop: 8 }}
             />
-            <Pressable style={styles.cameraButton} onPress={() => addItemToShoppingList(addManualInput)}>
-              <ThemedText style={styles.cameraButtonText}>Add Product</ThemedText>
+            <Pressable style={styles.button} onPress={() => addItemToShoppingList(addManualInput)}>
+              <ThemedText style={styles.buttonText}>Add Product</ThemedText>
             </Pressable>
           </View>
         )}
@@ -121,8 +118,8 @@ export default function ShoppingList() {
                 </View>
               </ThemedView>
             ))}
-            <Pressable style={styles.cameraButton} onPress={() => { }}>
-              <ThemedText style={styles.cameraButtonText}>🏠 Order Items</ThemedText>
+            <Pressable style={styles.button} onPress={() => { }}>
+              <ThemedText style={styles.buttonText}>🏠 Order Items</ThemedText>
             </Pressable>
           </>
         )}
@@ -133,16 +130,11 @@ export default function ShoppingList() {
 
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
   stepContainer: {
     gap: 8,
     marginBottom: 8,
   },
-  cameraButton: {
+  button: {
     backgroundColor: '#007AFF',
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -150,7 +142,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cameraButtonText: {
+  buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',

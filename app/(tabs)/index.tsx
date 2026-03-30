@@ -7,16 +7,13 @@ export default function HomeScreen() {
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={{
-        paddingTop: 50,
+        paddingTop: 20,
         paddingHorizontal: 16,
         minHeight: '100%',
         gap: 16,
         backgroundColor: "white",
       }}
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">What&apos;s at Home</ThemedText>
-      </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="default">Welcome to What&apos;s at Home! We&apos;re here to make your life easier by helping you discover delicious recipes based on the ingredients you already have at home.</ThemedText>
         <ThemedText type="subtitle">Your meal planner</ThemedText>
@@ -33,11 +30,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
   stepContainer: {
     gap: 8,
     marginBottom: 8,
