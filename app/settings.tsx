@@ -1,0 +1,100 @@
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { useContext } from 'react';
+import { ScrollView, StyleSheet, TextInput } from 'react-native';
+import { AppContext } from './_layout';
+
+export default function Settings() {
+  const { user, setUser } = useContext(AppContext);
+
+  return (
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{
+        paddingTop: 20,
+        paddingHorizontal: 16,
+        minHeight: '100%',
+        gap: 16,
+        backgroundColor: "white",
+      }}
+    >
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText style={{ fontSize: 18, fontWeight: '600' }}>User Settings</ThemedText>
+        <TextInput
+          placeholder="Name"
+          value={user?.name ?? ''}
+          onChangeText={(text) => setUser(user ? { ...user, name: text } : null)}
+          style={{ backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8 }}
+        />
+        <TextInput
+          placeholder="Email"
+          value={user?.email ?? ''}
+          onChangeText={(text) => setUser(user ? { ...user, email: text } : null)}
+          style={{ backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8 }}
+        />
+        <TextInput
+          placeholder="Language"
+          value={user?.language ?? ''}
+          onChangeText={(text) => setUser(user ? { ...user, language: text } : null)}
+          style={{ backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8 }}
+        />
+        <TextInput
+          placeholder="Dietary Preferences (comma separated)"
+          value={user?.dietary_preferences.join(', ') ?? ''}
+          onChangeText={(text) => setUser(user ? { ...user, dietary_preferences: text.split(',').map(s => s.trim()) } : null)}
+          style={{ backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8 }}
+        />
+      </ThemedView>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  stepContainer: {
+    gap: 8,
+    marginBottom: 8,
+  },
+  productsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  productCard: {
+    width: '48%',
+    marginTop: 12,
+  },
+  productImage: {
+    width: '100%',
+    height: 100,
+    marginTop: 4,
+    borderRadius: 6,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  recipeButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+  recipeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  }
+});

@@ -1,3 +1,4 @@
+import { EXAMPLE_USER } from '@/constants/example-data';
 import { getAllRecipes, getShoppingList, initDatabase } from '@/database';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -9,6 +10,16 @@ import 'react-native-reanimated';
 export const unstable_settings = {
   anchor: '(tabs)',
 };
+
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+  language: string;
+  dietary_preferences: string[];
+  created_at: string;
+  updated_at: string;
+}
 
 export type Recipe = {
   id: number;
@@ -40,6 +51,8 @@ export type ShoppingListItem = {
 }
 
 interface AppContextType {
+  user: User | null;
+  setUser: (user: User | null) => void;
   barcodes: string[];
   setBarcodes: (barcodes: string[]) => void;
   shoppingList: ShoppingListItem[];
@@ -51,10 +64,12 @@ interface AppContextType {
 }
 
 export const AppContext = createContext<AppContextType>({
+  user: null,
   barcodes: [],
   openRecipe: null,
   savedRecipes: [],
   shoppingList: [],
+  setUser: (user: User | null) => { },
   setBarcodes: (barcodes: string[]) => { },
   setSavedRecipes: (recipes: Recipe[]) => { },
   setOpenRecipe: (recipe: Recipe | null) => { },
@@ -62,6 +77,7 @@ export const AppContext = createContext<AppContextType>({
 });
 
 export default function RootLayout() {
+  const [user, setUser] = useState<User | null>(EXAMPLE_USER);
   const [barcodes, setBarcodes] = useState<string[]>([]);
   const [openRecipe, setOpenRecipe] = useState<Recipe | null>(null);
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([] /* EXAMPLE_SHOPPING_LIST */);
@@ -106,9 +122,11 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AppContext.Provider value={{
+        user,
         barcodes,
         setBarcodes,
         openRecipe,
+        setUser,
         setOpenRecipe,
         shoppingList,
         setShoppingList,

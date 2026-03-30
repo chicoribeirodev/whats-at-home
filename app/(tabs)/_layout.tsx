@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Text, View } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -15,12 +16,29 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: true,
         tabBarButton: HapticTab,
+        header: ({ navigation, route, options }) => {
+          const title = options.title ?? route.name;
+
+          return (
+            <View style={{ paddingTop: 45, paddingHorizontal: 16, paddingBottom: 16 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: 20, fontWeight: '600', color: Colors[colorScheme ?? 'light'].text, flex: 1, marginLeft: route.name !== 'index' ? 8 : 0 }}>{title}</Text>
+                <Text
+                  onPress={() => navigation.navigate('settings')}
+                  style={{ fontSize: 14, color: Colors[colorScheme ?? 'light'].text, opacity: 0.7 }}
+                >
+                  Settings
+                </Text>
+              </View>
+            </View>
+          );
+        }
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="barcode" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
