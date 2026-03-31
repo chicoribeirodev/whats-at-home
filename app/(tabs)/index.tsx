@@ -16,13 +16,7 @@ export default function HomeScreen() {
     >
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="default">Welcome to What&apos;s at Home! We&apos;re here to make your life easier by helping you discover delicious recipes based on the ingredients you already have at home.</ThemedText>
-        <ThemedText type="subtitle">Your meal planner</ThemedText>
-        <ThemedText type="default">TO DO</ThemedText>
-        <ThemedText type="subtitle">Your recipes</ThemedText>
-        <ThemedText type="default">TO DO</ThemedText>
-        <ThemedText type="subtitle">Your shopping list</ThemedText>
-        <ThemedText type="default">TO DO</ThemedText>
-        <ThemedText type="subtitle">Your stats</ThemedText>
+        <ThemedText type="subtitle">Calendar</ThemedText>
         <ThemedText type="default">TO DO</ThemedText>
       </ThemedView>
     </ScrollView>

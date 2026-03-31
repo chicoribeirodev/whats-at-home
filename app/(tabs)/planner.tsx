@@ -19,7 +19,7 @@ export default function Planner() {
   const [meals, setMeals] = useState<any[]>([] /* EXAMPLE_MEAL_RECIPES */);
   const [loadingMeals, setLoadingMeals] = useState(false);
 
-  const { setSavedRecipes, setShoppingList, setOpenRecipe } = useContext(AppContext)
+  const { setSavedRecipes, setShoppingList, setOpenRecipe, user } = useContext(AppContext)
 
   const getMealRecipes = async () => {
     console.log('Generating meals and recipes:');
@@ -29,7 +29,7 @@ export default function Planner() {
 
     const response = await aiClient.responses.create({
       model: MODEL,
-      input: generateMealsPrompt(inputValues),
+      input: generateMealsPrompt(inputValues, user?.language || 'en'),
       text: generateMealsOutputSchema as any,
     });
 
@@ -52,7 +52,7 @@ export default function Planner() {
 
     const response = await aiClient.responses.create({
       model: MODEL,
-      input: regenerateMealRecipePrompt(mealToRegenerate, otherMeals),
+      input: regenerateMealRecipePrompt(mealToRegenerate, otherMeals, user?.language || 'en'),
       text: generateMealsOutputSchema as any,
     });
 
@@ -125,7 +125,7 @@ export default function Planner() {
 
     const response = await aiClient.responses.create({
       model: MODEL,
-      input: generateShoppingListPrompt(meals),
+      input: generateShoppingListPrompt(meals, user?.language || 'en'),
       text: generateShoppingListOutputSchema as any,
     });
 

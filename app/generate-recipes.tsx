@@ -18,7 +18,7 @@ export default function Recipes() {
   const [addManuallyEnabled, setAddManuallyEnabled] = useState(false);
   const [addManualInput, setAddManualInput] = useState({ name: '', quantity: '', unit: '' });
 
-  const { barcodes, setOpenRecipe } = useContext(AppContext);
+  const { barcodes, setOpenRecipe, user } = useContext(AppContext);
 
   const getProductInfo = async (barcode: string) => {
     try {
@@ -59,7 +59,7 @@ export default function Recipes() {
 
     const response = await aiClient.responses.create({
       model: MODEL,
-      input: generateRecipesPrompt(products),
+      input: generateRecipesPrompt(products, user?.language || 'en'),
       text: generateRecipesOutputSchema as any,
     });
 

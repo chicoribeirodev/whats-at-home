@@ -138,6 +138,7 @@ export default function RootLayout() {
           <Stack.Screen name="barcode-scanner" options={{ title: 'Scan Barcode' }} />
           <Stack.Screen name="recipe" options={{ title: 'Recipe Details' }} />
           <Stack.Screen name="generate-recipes" options={{ title: 'Generate Recipes' }} />
+          <Stack.Screen name="settings" options={{ title: 'Settings' }} />
         </Stack>
       </AppContext.Provider>
       <StatusBar style="auto" />

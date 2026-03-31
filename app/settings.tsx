@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Picker } from '@react-native-picker/picker';
 import { useContext } from 'react';
 import { ScrollView, StyleSheet, TextInput } from 'react-native';
 import { AppContext } from './_layout';
@@ -33,17 +34,21 @@ export default function Settings() {
           style={{ backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8 }}
         />
         <TextInput
-          placeholder="Language"
-          value={user?.language ?? ''}
-          onChangeText={(text) => setUser(user ? { ...user, language: text } : null)}
-          style={{ backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8 }}
-        />
-        <TextInput
           placeholder="Dietary Preferences (comma separated)"
           value={user?.dietary_preferences.join(', ') ?? ''}
           onChangeText={(text) => setUser(user ? { ...user, dietary_preferences: text.split(',').map(s => s.trim()) } : null)}
           style={{ backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8 }}
         />
+        <ThemedText style={{ fontSize: 16, fontWeight: '600', marginTop: 12 }}>Language</ThemedText>
+        <Picker
+          selectedValue={user?.language ?? 'en-US'}
+          onValueChange={(value) => setUser(user ? { ...user, language: value } : null)}
+        >
+          <Picker.Item label="Portuguese" value="pt-PT" />
+          <Picker.Item label="English" value="en-US" />
+          <Picker.Item label="Spanish" value="es-ES" />
+          <Picker.Item label="French" value="fr-FR" />
+        </Picker>
       </ThemedView>
     </ScrollView>
   );

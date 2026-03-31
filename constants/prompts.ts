@@ -1,14 +1,4 @@
-export const originalGenerateRecipesPrompt = (products: any[]) => `Generate a list of 3 practical recipes using the following ingredients: ${products.map(p => `${p.name} ${p.quantity} ${p.unit}`).join(", ")}.
-        These recipes should only include the provided ingredients and should be able to make at home.
-        You can assume basic pantry staples like salt, pepper, oil, olive oil, onion and garlic are available for cooking, but they don't need to be included in the recipes mandatorily, only if they make sense to be included.
-        These recipes should be useful and make sense given the provided ingredients. 
-        They don't need to include all the ingredients, but try to use as many as possible.
-        Consider at least one simple recipe.
-        Try to keep the recipes as simple and easy to make as possible, but it's ok to provide one harder recipe if it makes good use of the ingredients.
-        The third recipe should include the if_you_also_have field with a list of 3 additional ingredients that would make the recipe better but are not strictly necessary, and that the user is likely to have at home - add 'bonus recipe' in the title to identify this one.
-        `
-
-export const generateRecipesPrompt = (products: any[]) => `Role: You are a practical home-cooking assistant.
+export const generateRecipesPrompt = (products: any[], language: string) => `Role: You are a practical home-cooking assistant.
 
 Input ingredients:
 ${products.map(p => `${p.name} ${p.quantity} ${p.unit}`).join(", ")}
@@ -39,9 +29,11 @@ Recipe 3 rules:
 Output rules:
 - Output must strictly match the provided JSON schema
 - No commentary, no explanations, no extra text
-- Output ONLY valid JSON`
+- Output ONLY valid JSON
+- Output must be in ${language}
+`
 
-export const generateMealsPrompt = (inputValues: any) => `Create a meal plan for the next ${inputValues.lunches} lunches and ${inputValues.dinners} dinners for ${inputValues.people} people, based on the following information.
+export const generateMealsPrompt = (inputValues: any, language: string) => `Create a meal plan for the next ${inputValues.lunches} lunches and ${inputValues.dinners} dinners for ${inputValues.people} people, based on the following information.
 
 Dietary goals:
 ${inputValues.dietaryGoals}
@@ -84,9 +76,10 @@ Output rules:
 - Output must strictly match the provided JSON schema
 - No commentary, no explanations, no extra text
 - Output ONLY valid JSON
+- Output must be in ${language}
 `
 
-export const regenerateMealRecipePrompt = (meal: any, otherMeals: any[]) => `Regenerate the recipe for the following meal, keeping the same type of meal (lunch or dinner) and the same dietary goals and restrictions, but providing a completely different recipe that does not repeat the main protein or dish style. The new recipe should still be practical and easy to cook at home, with a cooking time ideally under 40 minutes, and using ingredients that are easy to find in Portugal.
+export const regenerateMealRecipePrompt = (meal: any, otherMeals: any[], language: string) => `Regenerate the recipe for the following meal, keeping the same type of meal (lunch or dinner) and the same dietary goals and restrictions, but providing a completely different recipe that does not repeat the main protein or dish style. The new recipe should still be practical and easy to cook at home, with a cooking time ideally under 40 minutes, and using ingredients that are easy to find in Portugal.
 
 Meal to regenerate:
 ${JSON.stringify(meal)}
@@ -118,9 +111,10 @@ Output rules:
 - Output must strictly match the provided JSON schema
 - No commentary, no explanations, no extra text
 - Output ONLY valid JSON
+- Output must be in ${language}
 `
 
-export const generateShoppingListPrompt = (meals: any[]) => `You are given a list of meals with their ingredients.
+export const generateShoppingListPrompt = (meals: any[], language: string) => `You are given a list of meals with their ingredients.
 
 Task:
 Create a consolidated shopping list by combining all ingredients across all meals.
@@ -180,6 +174,7 @@ Output Rules:
 - The output MUST strictly match the provided JSON schema.
 - Do not include explanations, comments, or extra text.
 - Output ONLY valid JSON.
+- Output must be in ${language}
 `
 
 export const generateRecipesOutputSchema = {
