@@ -1,5 +1,5 @@
 import { EXAMPLE_USER } from '@/constants/example-data';
-import { getAllRecipes, getShoppingList, initDatabase } from '@/database';
+import { getAllRecipes, getShoppingList, getUsersRemote, initDatabase } from '@/database';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -117,6 +117,20 @@ export default function RootLayout() {
     initDB();
     loadSavedRecipes();
     loadShoppingList();
+  }, []);
+
+  // REMOVE LATER - FOR TESTING PURPOSES ONLY
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const users = await getUsersRemote();
+        console.log('Fetched users from remote database:', users);
+      } catch (error) {
+        console.error('Error fetching users from remote database:', error);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   return (
