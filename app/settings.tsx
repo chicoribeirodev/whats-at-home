@@ -35,7 +35,7 @@ export default function Settings() {
         />
         <TextInput
           placeholder="Dietary Preferences (comma separated)"
-          value={user?.dietary_preferences.join(', ') ?? ''}
+          value={user?.dietary_preferences?.join(', ') ?? ''}
           onChangeText={(text) => setUser(user ? { ...user, dietary_preferences: text.split(',').map(s => s.trim()) } : null)}
           style={{ backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8 }}
         />
@@ -49,6 +49,13 @@ export default function Settings() {
           <Picker.Item label="Spanish" value="es-ES" />
           <Picker.Item label="French" value="fr-FR" />
         </Picker>
+        <ThemedText style={{ fontSize: 16, fontWeight: '600', marginTop: 12 }}>Related Users</ThemedText>
+        {user?.related_users?.map((relatedUser) => (
+          <ThemedText key={relatedUser.id}>{relatedUser.name}</ThemedText>
+        ))}
+        {!user?.related_users || user.related_users.length === 0 ? (
+          <ThemedText type="subtitle">No related users found.</ThemedText>
+        ) : null}
       </ThemedView>
     </ScrollView>
   );

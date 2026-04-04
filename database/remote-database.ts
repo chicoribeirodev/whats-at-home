@@ -20,7 +20,35 @@ export const getUserRemote = async (userId: number) => {
     console.error('Error fetching user:', error)
     return null
   }
-  return data
+
+  const { data: userRelated, error: relatedError } = await supabase
+    .from('user_relationships')
+    .select('*')
+    .eq('user_id', userId)
+
+  console.log('Fetched user-related data from remote database:', userRelated)
+
+  if (relatedError) {
+    console.error('Error fetching user-related data:', relatedError)
+  }
+
+  if (userRelated && userRelated.length > 0) {
+    const relatedIds = userRelated.map(rel => rel.related_user_id)
+    const { data: relatedUsers, error: relatedUsersError } = await supabase
+      .from('user')
+      .select('*')
+      .in('id', relatedIds)
+
+    console.log('Fetched related users from remote database:', relatedUsers)
+
+    if (relatedUsersError) {
+      console.error('Error fetching related users:', relatedUsersError)
+    }
+
+    return { ...data, related_users: relatedUsers }
+  }
+
+  return { ...data }
 }
 
 export const getRecipesRemote = async () => {

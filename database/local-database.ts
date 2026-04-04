@@ -31,10 +31,8 @@ export const initDatabase = async () => {
       total_price_eur REAL NOT NULL
     );
 
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY NOT NULL,
-      email TEXT NOT NULL,
-      password TEXT NOT NULL
+    CREATE TABLE IF NOT EXISTS logged_in_user (
+      id INTEGER PRIMARY KEY NOT NULL
     );
   `);
 };
@@ -43,7 +41,7 @@ export const clearDatabase = async () => {
   await db.execAsync(`
     DROP TABLE IF EXISTS recipes;
     DROP TABLE IF EXISTS shopping_list;
-    DROP TABLE IF EXISTS users;
+    DROP TABLE IF EXISTS logged_in_user;
   `);
 };
 
@@ -91,12 +89,21 @@ export const seedDatabase = async () => {
       0.015,
       6
     );
-
-    INSERT INTO users (email, password) VALUES (
-      'user@example.com',
-      'password123'
-    );
   `);
+};
+
+export const getLoggedInUserId = async (): Promise<number | null> => {
+  const result = (await db.getAllAsync('SELECT id FROM logged_in_user LIMIT 1')) as Array<{
+    id: number;
+  }>;
+
+  console.dir(result, { depth: null });
+  return result.length > 0 ? result[0].id : null;
+};
+
+export const setLoggedInUserId = async (userId: number | null) => {
+  console.log(`Setting logged in user id to ${userId} in local database.`);
+  await db.runAsync('INSERT OR REPLACE INTO logged_in_user (id) VALUES (?)', [userId]);
 };
 
 export const getAllRecipes = async () => {
@@ -111,10 +118,6 @@ export const getAllRecipes = async () => {
 
 export const getShoppingList = async () => {
   return await db.getAllAsync('SELECT * FROM shopping_list');
-};
-
-export const getUser = async (email: string) => {
-  return await db.getFirstAsync('SELECT * FROM users WHERE email = ?', [email]);
 };
 
 export const addRecipe = async (recipe: any) => {

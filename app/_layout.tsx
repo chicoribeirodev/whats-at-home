@@ -1,5 +1,4 @@
-import { EXAMPLE_USER } from '@/constants/example-data';
-import { getAllRecipes, getShoppingList, getUsersRemote, initDatabase } from '@/database';
+import { getAllRecipes, getLoggedInUserId, getShoppingList, getUserRemote, initDatabase } from '@/database';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -19,6 +18,7 @@ export type User = {
   dietary_preferences: string[];
   created_at: string;
   updated_at: string;
+  related_users?: User[];
 }
 
 export type Recipe = {
@@ -77,7 +77,7 @@ export const AppContext = createContext<AppContextType>({
 });
 
 export default function RootLayout() {
-  const [user, setUser] = useState<User | null>(EXAMPLE_USER);
+  const [user, setUser] = useState<User | null>(null);
   const [barcodes, setBarcodes] = useState<string[]>([]);
   const [openRecipe, setOpenRecipe] = useState<Recipe | null>(null);
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([] /* EXAMPLE_SHOPPING_LIST */);
@@ -119,18 +119,25 @@ export default function RootLayout() {
     loadShoppingList();
   }, []);
 
-  // REMOVE LATER - FOR TESTING PURPOSES ONLY
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchUser = async () => {
       try {
-        const users = await getUsersRemote();
-        console.log('Fetched users from remote database:', users);
+        const loggedInUser = await getLoggedInUserId();
+        console.log(`Logged in user ID from local database: ${loggedInUser}`);
+        if (!loggedInUser) {
+          console.log('No logged in user found in local database.');
+          return;
+        }
+        console.log(`Logged in user ID from local database: ${loggedInUser}`);
+        const user = await getUserRemote(loggedInUser);
+        console.log('Fetched user from remote database:', user);
+        setUser(user);
       } catch (error) {
-        console.error('Error fetching users from remote database:', error);
+        console.error('Error fetching user from remote database:', error);
       }
     };
 
-    fetchUsers();
+    fetchUser();
   }, []);
 
   return (
