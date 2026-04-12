@@ -23,6 +23,15 @@ export const getUserById = async (userId: string) => {
   return data
 }
 
+export const getUserByEmail = async (email: string) => {
+  const { data, error } = await supabase.from('user').select('*').eq('email', email).single()
+  if (error) {
+    console.error('Error fetching user by email:', error)
+    return null
+  }
+  return data
+}
+
 export const getUserRemote = async (userId: string) => {
   const { data, error } = await supabase.from('user').select('*').eq('id', userId).single()
   if (error) {

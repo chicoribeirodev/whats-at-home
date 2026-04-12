@@ -123,21 +123,23 @@ export default function RootLayout() {
     const fetchUser = async () => {
       try {
         const loggedInUser = await getLoggedInUserId();
+
         if (!loggedInUser) {
-          console.log('No logged in user found in local database.');
+          console.log('No logged in user found.');
           return;
         }
-        console.log(`Logged in user ID from local database: ${loggedInUser}`);
+
         const user = await getUserRemote(loggedInUser);
-        console.log('Fetched user from remote database:', user);
         setUser(user);
       } catch (error) {
-        console.error('Error fetching user from remote database:', error);
+        console.error('Error fetching user:', error);
       }
     };
 
     fetchUser();
-  }, [user?.id]);
+  }, []);
+
+  const isLoggedIn = !!user;
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -154,11 +156,16 @@ export default function RootLayout() {
         setSavedRecipes
       }}>
         <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="barcode-scanner" options={{ title: 'Scan Barcode' }} />
-          <Stack.Screen name="recipe" options={{ title: 'Recipe Details' }} />
-          <Stack.Screen name="generate-recipes" options={{ title: 'Generate Recipes' }} />
-          <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+          <Stack.Protected guard={isLoggedIn}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="barcode-scanner" options={{ title: 'Scan Barcode' }} />
+            <Stack.Screen name="recipe" options={{ title: 'Recipe Details' }} />
+            <Stack.Screen name="generate-recipes" options={{ title: 'Generate Recipes' }} />
+            <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+          </Stack.Protected>
+          <Stack.Protected guard={!isLoggedIn}>
+            <Stack.Screen name="login" options={{ title: 'Login' }} />
+          </Stack.Protected>
         </Stack>
       </AppContext.Provider>
       <StatusBar style="auto" />

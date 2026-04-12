@@ -1,27 +1,18 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { clearDatabase, getUserRemote, initDatabase, setLoggedInUserId } from '@/database';
+import { removeLoggedInUserId } from '@/database';
 import { Picker } from '@react-native-picker/picker';
 import { useContext } from 'react';
 import { ScrollView, StyleSheet, TextInput } from 'react-native';
 import { AppContext } from './_layout';
 
 export default function Settings() {
-  const { user, setUser, setShoppingList, setSavedRecipes } = useContext(AppContext);
+  const { user, setUser } = useContext(AppContext);
 
-  const resetUser = async () => {
-    const userId = "eb7adb39-5a07-42c5-bc15-a65f5ed213e2";
-    await setLoggedInUserId(userId);
-    const updatedUser = await getUserRemote(userId);
-    setUser(updatedUser);
-  };
-
-  const resetDatabase = async () => {
-    await clearDatabase();
-    await initDatabase();
+  const logout = async () => {
+    await removeLoggedInUserId();
+    console.log('User logged out, local database cleared.');
     setUser(null);
-    setShoppingList([]);
-    setSavedRecipes([]);
   };
 
   return (
@@ -72,14 +63,14 @@ export default function Settings() {
         {!user?.related_users || user.related_users.length === 0 ? (
           <ThemedText type="default">No related users found.</ThemedText>
         ) : null}
+        <ThemedView style={styles.button} onTouchStart={logout}>
+          <ThemedText style={styles.buttonText}>Logout</ThemedText>
+        </ThemedView>
         <ThemedText style={{ fontSize: 18, fontWeight: '600', marginTop: 40 }}>Debug Actions</ThemedText>
         <ThemedText type="default">Use the buttons below to reset the user or clear the database for testing purposes.</ThemedText>
-        <ThemedView style={styles.button} onTouchStart={resetUser}>
-          <ThemedText style={styles.buttonText}>Reset User</ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.button} onTouchStart={resetDatabase}>
+        {/* <ThemedView style={styles.button} onTouchStart={resetDatabase}>
           <ThemedText style={styles.buttonText}>Reset Database</ThemedText>
-        </ThemedView>
+        </ThemedView> */}
       </ThemedView>
     </ScrollView>
   );
