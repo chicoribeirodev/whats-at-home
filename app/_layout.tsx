@@ -123,7 +123,6 @@ export default function RootLayout() {
     const fetchUser = async () => {
       try {
         const loggedInUser = await getLoggedInUserId();
-        console.log(`Logged in user ID from local database: ${loggedInUser}`);
         if (!loggedInUser) {
           console.log('No logged in user found in local database.');
           return;
@@ -138,7 +137,7 @@ export default function RootLayout() {
     };
 
     fetchUser();
-  }, []);
+  }, [user?.id]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

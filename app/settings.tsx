@@ -1,12 +1,28 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { clearDatabase, getUserRemote, initDatabase, setLoggedInUserId } from '@/database';
 import { Picker } from '@react-native-picker/picker';
 import { useContext } from 'react';
 import { ScrollView, StyleSheet, TextInput } from 'react-native';
 import { AppContext } from './_layout';
 
 export default function Settings() {
-  const { user, setUser } = useContext(AppContext);
+  const { user, setUser, setShoppingList, setSavedRecipes } = useContext(AppContext);
+
+  const resetUser = async () => {
+    const userId = "eb7adb39-5a07-42c5-bc15-a65f5ed213e2";
+    await setLoggedInUserId(userId);
+    const updatedUser = await getUserRemote(userId);
+    setUser(updatedUser);
+  };
+
+  const resetDatabase = async () => {
+    await clearDatabase();
+    await initDatabase();
+    setUser(null);
+    setShoppingList([]);
+    setSavedRecipes([]);
+  };
 
   return (
     <ScrollView
@@ -54,8 +70,16 @@ export default function Settings() {
           <ThemedText key={relatedUser.id}>{relatedUser.name}</ThemedText>
         ))}
         {!user?.related_users || user.related_users.length === 0 ? (
-          <ThemedText type="subtitle">No related users found.</ThemedText>
+          <ThemedText type="default">No related users found.</ThemedText>
         ) : null}
+        <ThemedText style={{ fontSize: 18, fontWeight: '600', marginTop: 40 }}>Debug Actions</ThemedText>
+        <ThemedText type="default">Use the buttons below to reset the user or clear the database for testing purposes.</ThemedText>
+        <ThemedView style={styles.button} onTouchStart={resetUser}>
+          <ThemedText style={styles.buttonText}>Reset User</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.button} onTouchStart={resetDatabase}>
+          <ThemedText style={styles.buttonText}>Reset Database</ThemedText>
+        </ThemedView>
       </ThemedView>
     </ScrollView>
   );
