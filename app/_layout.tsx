@@ -4,6 +4,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { createContext, useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
 import 'react-native-reanimated';
 
 export const unstable_settings = {
@@ -77,6 +78,8 @@ export const AppContext = createContext<AppContextType>({
 });
 
 export default function RootLayout() {
+  const [state, setState] = useState("Initializing...");
+
   const [user, setUser] = useState<User | null>(null);
   const [barcodes, setBarcodes] = useState<string[]>([]);
   const [openRecipe, setOpenRecipe] = useState<Recipe | null>(null);
@@ -89,43 +92,47 @@ export default function RootLayout() {
       try {
         await initDatabase();
         console.log('Database initialized successfully!');
+        setState('Database initialized');
       } catch (error) {
         console.error('Error initializing database:', error);
+        setState('Error initializing database');
       }
     };
 
     const loadSavedRecipes = async () => {
       try {
         console.log('Fetching saved recipes from database...');
+        setState('Loading saved recipes...');
         const recipes = await getAllRecipes();
         setSavedRecipes(recipes as Recipe[]);
       } catch (error) {
         console.error('Error fetching saved recipes:', error);
+        setState('Error loading saved recipes');
       }
     };
 
     const loadShoppingList = async () => {
       try {
         console.log('Fetching shopping list from database...');
+        setState('Loading shopping list...');
         const items = await getShoppingList();
         setShoppingList(items as ShoppingListItem[]);
       } catch (error) {
         console.error('Error fetching shopping list:', error);
+        setState('Error loading shopping list');
       }
     };
 
-    initDB();
-    loadSavedRecipes();
-    loadShoppingList();
-  }, []);
-
-  useEffect(() => {
     const fetchUser = async () => {
       try {
+        console.log('Checking for logged in user...');
+        setState('Checking for logged in user...');
+
         const loggedInUser = await getLoggedInUserId();
 
         if (!loggedInUser) {
           console.log('No logged in user found.');
+          setState('No logged in user');
           return;
         }
 
@@ -133,10 +140,18 @@ export default function RootLayout() {
         setUser(user);
       } catch (error) {
         console.error('Error fetching user:', error);
+        setState('Error fetching user');
       }
     };
 
-    fetchUser();
+    const init = async () => {
+      await initDB();
+      await loadSavedRecipes();
+      await loadShoppingList();
+      await fetchUser();
+    };
+
+    init();
   }, []);
 
   const isLoggedIn = !!user;
@@ -164,7 +179,14 @@ export default function RootLayout() {
             <Stack.Screen name="settings" options={{ title: 'Settings' }} />
           </Stack.Protected>
           <Stack.Protected guard={!isLoggedIn}>
-            <Stack.Screen name="login" options={{ title: 'Login' }} />
+            <Stack.Screen name="login" options={{
+              title: 'Login', header: () => <View style={{ paddingTop: 45, paddingHorizontal: 16, paddingBottom: 16 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Text style={{ fontSize: 20, fontWeight: '600' }}>Login</Text>
+                  <Text style={{ fontSize: 13 }}>{state}</Text>
+                </View>
+              </View>
+            }} />
           </Stack.Protected>
         </Stack>
       </AppContext.Provider>
