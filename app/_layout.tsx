@@ -88,26 +88,17 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   useEffect(() => {
-    const initDB = async () => {
+    const init = async () => {
       try {
+        setState('Initializing database...');
         await initDatabase();
-        console.log('Database initialized successfully!');
-        setState('Database initialized');
-      } catch (error) {
-        console.error('Error initializing database:', error);
-        setState('Error initializing database');
-      }
-    };
 
-    const fetchUser = async () => {
-      try {
-        console.log('Checking for logged in user...');
+        console.log('Database initialized');
+
         setState('Checking for logged in user...');
-
         const loggedInUser = await getLoggedInUserId();
 
         if (!loggedInUser) {
-          console.log('No logged in user found.');
           setState('No logged in user');
           return;
         }
@@ -115,21 +106,18 @@ export default function RootLayout() {
         const user = await getUserRemote(loggedInUser);
         setUser(user);
       } catch (error) {
-        console.error('Error fetching user:', error);
-        setState(`Error fetching user: ${JSON.stringify(error)}`);
-      }
-    };
+        console.error('Init error:', error);
 
-    const init = async () => {
-      if (!user) {
-        setState('No user logged in, initializing database and checking for user...');
-        await initDB();
-        await fetchUser();
+        if (error instanceof Error) {
+          setState(error.message);
+        } else {
+          setState(String(error));
+        }
       }
     };
 
     init();
-  }, [JSON.stringify(user)]);
+  }, []);
 
   useEffect(() => {
     const loadSavedRecipes = async () => {
