@@ -24,40 +24,35 @@ export const getUserById = async (userId: string) => {
 }
 
 export const getUserByEmail = async (email: string) => {
-  const { data, error } = await supabase.from('user').select('*').eq('email', email).single()
-  if (error) {
-    console.error('Error fetching user by email:', error)
-    return null
-  }
-  return data
-}
+  try {
+    const { data, error } = await supabase.from('user').select('*').eq('email', email).single()
 
-export const getUserRemote = async (userId: string) => {
-  const { data, error } = await supabase.from('user').select('*').eq('id', userId).single()
-  if (error) {
-    console.error('Error fetching user:', error)
-    return null
-  }
+    if (error) {
+      console.error('Error fetching user by email:', error)
+      return null
+    }
 
-  console.dir(data, { depth: null });
+    const userId = data.id;
 
-  const userGroups = await getUserGroupsRemote(userId);
+    const userGroups = await getUserGroupsRemote(userId).catch(err => {
+      console.error('Error fetching user groups:', err);
+      return [];
+    });
 
-  console.log('Fetched user groups:', userGroups);
-
-  if (userGroups.length > 0) {
     data.related_users = [];
 
     for (const group of userGroups) {
-      const groupUsers = await getGroupUsersRemote(group.group_id);
-
-      console.log(`Fetched users for group ${group.group_id}:`, groupUsers);
+      const groupUsers = await getGroupUsersRemote(group.group_id).catch(err => {
+        console.error('Error fetching group users:', err);
+        return [];
+      });
 
       for (const groupUser of groupUsers) {
         if (groupUser.user_id !== userId) {
-
-          console.log(`Fetching related user with ID ${groupUser.user_id}...`);
-          const relatedUser = await getUserById(groupUser.user_id);
+          const relatedUser = await getUserById(groupUser.user_id).catch(err => {
+            console.error('Error fetching related user:', err);
+            return null;
+          });
 
           if (relatedUser) {
             data.related_users.push(relatedUser);
@@ -65,10 +60,56 @@ export const getUserRemote = async (userId: string) => {
         }
       }
     }
-  }
 
-  return data;
+    return data;
+  } catch (err) {
+    console.error('getUserRemote crashed:', err);
+    return null;
+  }
 }
+
+export const getUserRemote = async (userId: string) => {
+  try {
+    const { data, error } = await supabase.from('user').select('*').eq('id', userId).single();
+
+    if (error) {
+      console.error('Error fetching user:', error);
+      return null;
+    }
+
+    const userGroups = await getUserGroupsRemote(userId).catch(err => {
+      console.error('Error fetching user groups:', err);
+      return [];
+    });
+
+    data.related_users = [];
+
+    for (const group of userGroups) {
+      const groupUsers = await getGroupUsersRemote(group.group_id).catch(err => {
+        console.error('Error fetching group users:', err);
+        return [];
+      });
+
+      for (const groupUser of groupUsers) {
+        if (groupUser.user_id !== userId) {
+          const relatedUser = await getUserById(groupUser.user_id).catch(err => {
+            console.error('Error fetching related user:', err);
+            return null;
+          });
+
+          if (relatedUser) {
+            data.related_users.push(relatedUser);
+          }
+        }
+      }
+    }
+
+    return data;
+  } catch (err) {
+    console.error('getUserRemote crashed:', err);
+    return null;
+  }
+};
 
 export const getUserGroupsRemote = async (userId: string) => {
   console.log(`Fetching groups for user ${userId} from remote database...`);

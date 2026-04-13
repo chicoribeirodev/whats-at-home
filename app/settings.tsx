@@ -12,7 +12,7 @@ export default function Settings() {
   const { user, setUser } = useContext(AppContext);
 
   const logout = async () => {
-    await removeLoggedInUserId();
+    await removeLoggedInUserId(user?.id?.toString() ?? null);
     console.log('User logged out, local database cleared.');
     setUser(null);
   };

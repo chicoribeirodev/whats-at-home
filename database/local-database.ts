@@ -107,9 +107,9 @@ export const setLoggedInUserId = async (userId: string | null) => {
   await db.runAsync('INSERT OR REPLACE INTO logged_in_user (id) VALUES (?)', [userId]);
 };
 
-export const removeLoggedInUserId = async () => {
+export const removeLoggedInUserId = async (userId: string | null) => {
   console.log('Removing logged in user id from local database.');
-  await db.runAsync('DELETE FROM logged_in_user');
+  await db.runAsync('DELETE FROM logged_in_user WHERE id = ?', [userId]);
 }
 
 export const getAllRecipes = async () => {

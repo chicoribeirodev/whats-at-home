@@ -99,6 +99,39 @@ export default function RootLayout() {
       }
     };
 
+    const fetchUser = async () => {
+      try {
+        console.log('Checking for logged in user...');
+        setState('Checking for logged in user...');
+
+        const loggedInUser = await getLoggedInUserId();
+
+        if (!loggedInUser) {
+          console.log('No logged in user found.');
+          setState('No logged in user');
+          return;
+        }
+
+        const user = await getUserRemote(loggedInUser);
+        setUser(user);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        setState(`Error fetching user: ${JSON.stringify(error)}`);
+      }
+    };
+
+    const init = async () => {
+      if (!user) {
+        setState('No user logged in, initializing database and checking for user...');
+        await initDB();
+        await fetchUser();
+      }
+    };
+
+    init();
+  }, [JSON.stringify(user)]);
+
+  useEffect(() => {
     const loadSavedRecipes = async () => {
       try {
         console.log('Fetching saved recipes from database...');
@@ -123,36 +156,16 @@ export default function RootLayout() {
       }
     };
 
-    const fetchUser = async () => {
-      try {
-        console.log('Checking for logged in user...');
-        setState('Checking for logged in user...');
-
-        const loggedInUser = await getLoggedInUserId();
-
-        if (!loggedInUser) {
-          console.log('No logged in user found.');
-          setState('No logged in user');
-          return;
-        }
-
-        const user = await getUserRemote(loggedInUser);
-        setUser(user);
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        setState('Error fetching user');
+    const loadData = async () => {
+      if (!!user) {
+        setState(`User ${user.name} logged in, loading data...`);
+        await loadSavedRecipes();
+        await loadShoppingList();
       }
     };
 
-    const init = async () => {
-      await initDB();
-      await loadSavedRecipes();
-      await loadShoppingList();
-      await fetchUser();
-    };
-
-    init();
-  }, []);
+    loadData();
+  }, [JSON.stringify(user)]);
 
   const isLoggedIn = !!user;
 
