@@ -2,11 +2,13 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { removeLoggedInUserId } from '@/database';
 import { Picker } from '@react-native-picker/picker';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { ScrollView, StyleSheet, TextInput } from 'react-native';
 import { AppContext } from './_layout';
 
 export default function Settings() {
+  const [showUserInfo, setShowUserInfo] = useState(false);
+
   const { user, setUser } = useContext(AppContext);
 
   const logout = async () => {
@@ -71,6 +73,12 @@ export default function Settings() {
         {/* <ThemedView style={styles.button} onTouchStart={resetDatabase}>
           <ThemedText style={styles.buttonText}>Reset Database</ThemedText>
         </ThemedView> */}
+        <ThemedView style={styles.button} onTouchStart={() => setShowUserInfo(!showUserInfo)}>
+          <ThemedText style={styles.buttonText}>Show User</ThemedText>
+        </ThemedView>
+        {showUserInfo && user && (
+          <ThemedText type="default">Current user: {JSON.stringify(user, null, 2)}</ThemedText>
+        )}
       </ThemedView>
     </ScrollView>
   );
