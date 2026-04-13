@@ -8,9 +8,10 @@ import { ScrollView, StyleSheet, TextInput } from 'react-native';
 import { AppContext } from './_layout';
 
 export default function Settings() {
+  const [showUserInfo, setShowUserInfo] = useState(false);
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const { setUser } = useContext(AppContext);
+  const { user, setUser } = useContext(AppContext);
 
   const login = async () => {
     console.log('Login attempt with email:', email);
@@ -53,6 +54,17 @@ export default function Settings() {
           <ThemedText style={styles.buttonText}>Login</ThemedText>
         </ThemedView>
         {error && <ThemedText style={{ color: 'red', marginTop: 8 }}>{error}</ThemedText>}
+        <ThemedText style={{ fontSize: 18, fontWeight: '600', marginTop: 40 }}>Debug Actions</ThemedText>
+        <ThemedText type="default">Use the buttons below to reset the user or clear the database for testing purposes.</ThemedText>
+        {/* <ThemedView style={styles.button} onTouchStart={resetDatabase}>
+                  <ThemedText style={styles.buttonText}>Reset Database</ThemedText>
+                </ThemedView> */}
+        <ThemedView style={styles.button} onTouchStart={() => setShowUserInfo(!showUserInfo)}>
+          <ThemedText style={styles.buttonText}>Show User</ThemedText>
+        </ThemedView>
+        {showUserInfo && (
+          <ThemedText type="default">Current user: {JSON.stringify(user, null, 2)}</ThemedText>
+        )}
       </ThemedView>
     </ScrollView>
   );
