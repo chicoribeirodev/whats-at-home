@@ -32,7 +32,7 @@ export const initDatabase = async () => {
     );
 
     CREATE TABLE IF NOT EXISTS logged_in_user (
-      id UUID PRIMARY KEY NOT NULL
+      id TEXT PRIMARY KEY NOT NULL
     );
   `);
 };
@@ -104,7 +104,11 @@ export const getLoggedInUserId = async (): Promise<string | null> => {
 
 export const setLoggedInUserId = async (userId: string | null) => {
   console.log(`Setting logged in user id to ${userId} in local database.`);
-  await db.runAsync('INSERT OR REPLACE INTO logged_in_user (id) VALUES (?)', [userId]);
+  await db.runAsync('DELETE FROM logged_in_user');
+  await db.runAsync(
+    'INSERT INTO logged_in_user (id) VALUES (?)',
+    [userId]
+  );
 };
 
 export const removeLoggedInUserId = async (userId: string | null) => {

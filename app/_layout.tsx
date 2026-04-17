@@ -90,29 +90,25 @@ export default function RootLayout() {
   useEffect(() => {
     const init = async () => {
       try {
-        setState('Initializing database...');
+        setState('1. Initializing database');
         await initDatabase();
 
-        console.log('Database initialized');
-
-        setState('Checking for logged in user...');
+        setState('2. Reading logged in user');
         const loggedInUser = await getLoggedInUserId();
 
-        if (!loggedInUser) {
-          setState('No logged in user');
-          return;
-        }
+        setState(`3. User ID: ${loggedInUser ?? 'none'}`);
 
+        if (!loggedInUser) return;
+
+        setState('4. Fetching remote user');
         const user = await getUserRemote(loggedInUser);
-        setUser(user);
-      } catch (error) {
-        console.error('Init error:', error);
 
-        if (error instanceof Error) {
-          setState(error.message);
-        } else {
-          setState(String(error));
-        }
+        setState('5. Setting user');
+        setUser(user);
+
+        setState('6. Done');
+      } catch (error: any) {
+        setState(`ERROR: ${error?.message || String(error)}`);
       }
     };
 

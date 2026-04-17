@@ -70,32 +70,95 @@ export const getUserByEmail = async (email: string) => {
 
 export const getUserRemote = async (userId: string) => {
   try {
-    const { data, error } = await supabase.from('user').select('*').eq('id', userId).single();
-
-    if (error) {
-      console.error('Error fetching user:', error);
-      return null;
+    if (!userId) {
+      throw new Error('getUserRemote: userId is missing');
     }
 
-    const userGroups = await getUserGroupsRemote(userId).catch(err => {
-      console.error('Error fetching user groups:', err);
-      return [];
-    });
+    if (!supabase) {
+      throw new Error('getUserRemote: supabase client is undefined');
+    }
+
+    const fromFn = (supabase as any).from;
+    if (typeof fromFn !== 'function') {
+      throw new Error('getUserRemote: supabase.from is not a function');
+    }
+
+    const query = supabase.from('user');
+    if (!query) {
+      throw new Error('getUserRemote: supabase.from("user") returned undefined');
+    }
+
+    const selectFn = (query as any).select;
+    if (typeof selectFn !== 'function') {
+      throw new Error('getUserRemote: select is not a function');
+    }
+
+    const { data, error } = await query.select('*').eq('id', userId).single();
+
+    if (error) {
+      throw new Error(`getUserRemote: fetch user failed: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('getUserRemote: user not found');
+    }
+
+    if (typeof getUserGroupsRemote !== 'function') {
+      throw new Error('getUserRemote: getUserGroupsRemote is not a function');
+    }
+
+    let userGroups: any[] = [];
+    try {
+      userGroups = await getUserGroupsRemote(userId);
+    } catch (err) {
+      throw new Error(
+        `getUserRemote: getUserGroupsRemote crashed: ${err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
 
     data.related_users = [];
 
     for (const group of userGroups) {
-      const groupUsers = await getGroupUsersRemote(group.group_id).catch(err => {
-        console.error('Error fetching group users:', err);
-        return [];
-      });
+      if (!group?.group_id) {
+        throw new Error('getUserRemote: group.group_id missing');
+      }
+
+      if (typeof getGroupUsersRemote !== 'function') {
+        throw new Error('getUserRemote: getGroupUsersRemote is not a function');
+      }
+
+      let groupUsers: any[] = [];
+
+      try {
+        groupUsers = await getGroupUsersRemote(group.group_id);
+      } catch (err) {
+        throw new Error(
+          `getUserRemote: getGroupUsersRemote crashed for ${group.group_id}: ${err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
 
       for (const groupUser of groupUsers) {
+        if (!groupUser?.user_id) {
+          throw new Error('getUserRemote: groupUser.user_id missing');
+        }
+
         if (groupUser.user_id !== userId) {
-          const relatedUser = await getUserById(groupUser.user_id).catch(err => {
-            console.error('Error fetching related user:', err);
-            return null;
-          });
+          if (typeof getUserById !== 'function') {
+            throw new Error('getUserRemote: getUserById is not a function');
+          }
+
+          let relatedUser = null;
+
+          try {
+            relatedUser = await getUserById(groupUser.user_id);
+          } catch (err) {
+            throw new Error(
+              `getUserRemote: getUserById crashed for ${groupUser.user_id}: ${err instanceof Error ? err.message : String(err)
+              }`
+            );
+          }
 
           if (relatedUser) {
             data.related_users.push(relatedUser);
@@ -106,8 +169,11 @@ export const getUserRemote = async (userId: string) => {
 
     return data;
   } catch (err) {
-    console.error('getUserRemote crashed:', err);
-    return null;
+    throw new Error(
+      err instanceof Error
+        ? err.message
+        : `getUserRemote unknown error: ${String(err)}`
+    );
   }
 };
 
