@@ -1,8 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
+import Constants from 'expo-constants';
+
+const url = Constants.expoConfig?.extra?.supabaseUrl;
+const key = Constants.expoConfig?.extra?.supabaseAnonKey;
 
 const supabase = createClient(
-  process.env.EXPO_PUBLIC_SUPABASE_URL || '',
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || ''
+  url || '',
+  key || ''
 )
 
 export const getUsersRemote = async () => {
@@ -169,11 +173,7 @@ export const getUserRemote = async (userId: string) => {
 
     return data;
   } catch (err) {
-    throw new Error(
-      err instanceof Error
-        ? err.message
-        : `getUserRemote unknown error: ${String(err)}`
-    );
+    throw new Error(`getUserRemote error: ${String(err)}`);
   }
 };
 
