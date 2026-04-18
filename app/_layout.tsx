@@ -1,4 +1,10 @@
-import { getAllRecipes, getLoggedInUserId, getShoppingList, getUserRemote, initDatabase } from '@/database';
+import {
+  getAllRecipes,
+  getLoggedInUserId,
+  getShoppingList,
+  initDatabase
+} from '@/database/local-database';
+import { getUserRemote } from '@/database/remote-database';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -99,6 +105,10 @@ export default function RootLayout() {
         setState(`3. User ID: ${loggedInUser ?? 'none'}`);
 
         if (!loggedInUser) return;
+
+        if (typeof getUserRemote !== 'function') {
+          throw new Error('getUserRemote import failed');
+        }
 
         setState('4. Fetching remote user');
         const user = await getUserRemote(loggedInUser);
