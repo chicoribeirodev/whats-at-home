@@ -96,13 +96,13 @@ export default function RootLayout() {
   useEffect(() => {
     const init = async () => {
       try {
-        setState('1. Initializing database');
+        setState(state => `${state}1. Initializing database`);
         await initDatabase();
 
-        setState('2. Reading logged in user');
+        setState(state => `${state}2. Reading logged in user`);
         const loggedInUser = await getLoggedInUserId();
 
-        setState(`3. User ID: ${loggedInUser ?? 'none'}`);
+        setState(state => `${state}3. User ID: ${loggedInUser ?? 'none'}`);
 
         if (!loggedInUser) return;
 
@@ -110,15 +110,15 @@ export default function RootLayout() {
           throw new Error('getUserRemote import failed');
         }
 
-        setState('4. Fetching remote user');
+        setState(state => `${state}4. Fetching remote user`);
         const user = await getUserRemote(loggedInUser);
 
-        setState('5. Setting user');
+        setState(state => `${state}5. Setting user`);
         setUser(user);
 
-        setState('6. Done');
+        setState(state => `${state}6. Done`);
       } catch (error: any) {
-        setState(`ERROR: ${error?.message || String(error)}`);
+        setState(state => `${state}ERROR: ${error?.message || String(error)}`);
       }
     };
 
@@ -129,30 +129,30 @@ export default function RootLayout() {
     const loadSavedRecipes = async () => {
       try {
         console.log('Fetching saved recipes from database...');
-        setState('Loading saved recipes...');
+        setState(state => `${state}Loading saved recipes...`);
         const recipes = await getAllRecipes();
         setSavedRecipes(recipes as Recipe[]);
       } catch (error) {
         console.error('Error fetching saved recipes:', error);
-        setState('Error loading saved recipes');
+        setState(state => `${state}Error loading saved recipes`);
       }
     };
 
     const loadShoppingList = async () => {
       try {
         console.log('Fetching shopping list from database...');
-        setState('Loading shopping list...');
+        setState(state => `${state}Loading shopping list...`);
         const items = await getShoppingList();
         setShoppingList(items as ShoppingListItem[]);
       } catch (error) {
         console.error('Error fetching shopping list:', error);
-        setState('Error loading shopping list');
+        setState(state => `${state}Error loading shopping list`);
       }
     };
 
     const loadData = async () => {
       if (!!user) {
-        setState(`User ${user.name} logged in, loading data...`);
+        setState(state => `${state}User ${user.name} logged in, loading data...`);
         await loadSavedRecipes();
         await loadShoppingList();
       }
