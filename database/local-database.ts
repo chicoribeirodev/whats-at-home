@@ -98,7 +98,7 @@ export const getLoggedInUserId = async (): Promise<string | null> => {
     id: string;
   }>;
 
-  console.dir(result, { depth: null });
+  console.log(JSON.stringify(result));
   return result.length > 0 ? result[0].id : null;
 };
 
